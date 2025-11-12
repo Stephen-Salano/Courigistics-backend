@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        format_sql: true
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  # Email configurations for testing (Mailtrap).
+  # These values are self-contained for local dev but can be overridden by environment variables.
+  mail:
+    host: ${TEST_MAIL_HOST:sandbox.smtp.mailtrap.io}
+    port: ${TEST_MAIL_PORT:2525}
+    username: ${TEST_MAIL_USERNAME} # Your Mailtrap username from env vars
+    password: ${TEST_MAIL_PASSWORD} # Your Mailtrap password from env vars
+
+
+# Test-specific Logging
+logging:
+  level:
+    com.stephensalano.fileflow_api: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.Transaction: TRACE
+    org.springframework.orm.jpa.JpaTransactionManager: TRACE
