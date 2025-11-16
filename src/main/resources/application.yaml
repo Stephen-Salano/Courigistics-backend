@@ -35,7 +35,7 @@ server:
 
 # JWT Configuration with environment variables
 jwt:
-  secret-key:  ${JWT_SECRET_KEY}
+  secret-key: ${JWT_SECRET_KEY}
   #  encryption-key: ${JWT_ENCRYPTION_KEY} # <--- Our encryption key
   signing-key: ${JWT_SIGNING_KEY} # <--- New: Our signing key
   access-token-expiration: ${JWT_ACCESS_EXPR}

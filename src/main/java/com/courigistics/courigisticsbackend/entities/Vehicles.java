@@ -65,5 +65,4 @@ public class Vehicles {
     // TODO : Add vehicle insurance number
 
 
-
 }
