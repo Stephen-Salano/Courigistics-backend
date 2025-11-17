@@ -103,7 +103,7 @@ public class JwtService {
         }
     }
 
-    private String getIssuer() {
+    public String getIssuer() {
         return applicationName + "_" + getCurrentEnvironment();
     }
 
@@ -114,7 +114,7 @@ public class JwtService {
                 .orElse("default");
     }
 
-    private boolean isTokenValid(String token, UserDetails userDetails){
+    public boolean isTokenValid(String token, UserDetails userDetails){
         try{
             String username = extractUsername(token);
             boolean valid = username.equals(userDetails.getUsername())
@@ -167,7 +167,7 @@ public class JwtService {
         }
     }
 
-    private String extractUsername(String token) {
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -176,7 +176,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         try {
             return Jwts.parser()
                     .verifyWith(getSigningKey())
