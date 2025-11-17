@@ -63,7 +63,7 @@ public class SecurityConfig {
 
 
     @Bean // So spring can manage this as a bean
-    /**
+    /*
      * returns Authentication provider, which is a code Spring security interface responsible for handling a specific type of authentication
      *
      */
@@ -85,7 +85,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    /**
+    /*
      * This method configures the SecurityFilterChain, which is is a sequence of filters that Spring security applies to
      * incoming HTTP requests.
      * It defines which endpoints are public, which are protected, what roles are needed to access them and how auth is
@@ -105,9 +105,7 @@ public class SecurityConfig {
 
         // our application uses stateless JWT, we turn off CSRF
         http
-                .csrf(csrf -> {
-                    csrf.disable();
-                }).cors(cors -> {
+                .csrf(csrf -> csrf.disable()).cors(cors -> {
                     if (isDevOrTest){
                         cors.configurationSource(request -> {
                             if (request.getRequestURI().startsWith("/h2-console")){

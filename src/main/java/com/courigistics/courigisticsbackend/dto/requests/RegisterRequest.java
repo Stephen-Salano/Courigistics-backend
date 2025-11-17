@@ -1,4 +1,29 @@
 package com.courigistics.courigisticsbackend.dto.requests;
 
-public record RegisterRequest() {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+public record RegisterRequest(
+        @NotBlank(message = "Email cannot be blank")
+        @Email
+        String email,
+        @NotBlank(message = "Username must not be blank")
+        String username,
+
+        @NotBlank(message = "Password field must not be blank")
+        @Size(min = 8, max = 20, message = "Password must be within 8 to 20 characters")
+        @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+=])(?=\\S+$).{8,20}$",
+        message = "Password must contain at least one digit, one lowercase letter, one uppercase character and no whitespace")
+        String password,
+
+        @NotBlank(message = "First name is required")
+        @Size(max = 50, message = "First name cannot exceed 50 characters")
+        String firstName,
+
+        @NotBlank(message = "Last name is equired")
+        @Size(max = 50, message = "Last name cannot exceed 50 characters")
+        String lastName
+) {
 }
