@@ -1,9 +1,7 @@
-package com.courigistics.courigisticsbackend.dto.requests;
+package com.courigistics.courigisticsbackend.dto.requests.auth;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.courigistics.courigisticsbackend.dto.requests.AddressDTO;
+import jakarta.validation.constraints.*;
 
 public record RegisterRequest(
         @NotBlank(message = "Email cannot be blank")
@@ -24,6 +22,15 @@ public record RegisterRequest(
 
         @NotBlank(message = "Last name is equired")
         @Size(max = 50, message = "Last name cannot exceed 50 characters")
-        String lastName
+        String lastName,
+
+        @NotBlank(message = "Id is required" )
+        @Size(min = 5, max = 20)
+        String nationalId,
+
+        // Addresses
+        @NotBlank(message = "Address must be entered")
+        AddressDTO addressDTO
+
 ) {
 }

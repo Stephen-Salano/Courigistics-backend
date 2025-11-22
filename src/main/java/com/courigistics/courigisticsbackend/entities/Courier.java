@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -27,6 +28,15 @@ public class Courier {
     @GeneratedValue
     private UUID id;
 
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+
+    @Column(name = "profile)_image", unique = true)
+    private String profileImageUrl;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", unique = true, nullable = false)
     private Account account;
@@ -40,6 +50,9 @@ public class Courier {
 
     @Enumerated(EnumType.STRING)
     private EmploymentType employmentType;
+
+    @Column(name = "national_id", unique = true)
+    private String nationalId;
 
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
@@ -55,5 +68,11 @@ public class Courier {
 
     @Column(name = "max_deliveries_per_route")
     private Integer maxDeliveriesPerDay = 20;
+
+    @Column(name = "hired_At")
+    private LocalDateTime hiredAt;
+
+    @Column(name = "fired_at")
+    private LocalDateTime firedAt;
 
 }

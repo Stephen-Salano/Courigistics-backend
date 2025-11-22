@@ -44,9 +44,8 @@ public class SecurityHeadersConfig extends OncePerRequestFilter {
                             "style-src 'self' 'unsafe-inline'; " +
                             "frame-ancestors 'self';"
             );
-
-            filterChain.doFilter(request, response);
         }
+        filterChain.doFilter(request, response);
 
     }
 

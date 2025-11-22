@@ -1,9 +1,8 @@
 package com.courigistics.courigisticsbackend.repositories;
 
 import com.courigistics.courigisticsbackend.entities.Account;
-import com.courigistics.courigisticsbackend.entities.User;
+import com.courigistics.courigisticsbackend.entities.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -21,5 +20,5 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     boolean existsByEmail(String email);
 
 
-    String user(User user);
+    String user(Customer user);
 }

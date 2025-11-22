@@ -2,22 +2,20 @@ package com.courigistics.courigisticsbackend.entities;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "customers")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@Builder
+public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -26,18 +24,12 @@ public class User {
     @JoinColumn(name = "account_id", unique = true, nullable = false)
     private List<Account> account;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-    @Column(name = "national_id", unique = true)
-    private String nationalId;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     @Column(name = "profile)_image", unique = true)
     private String profileImageUrl;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

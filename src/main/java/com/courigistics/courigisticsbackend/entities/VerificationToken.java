@@ -14,6 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class VerificationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

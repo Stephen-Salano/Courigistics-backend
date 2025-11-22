@@ -51,27 +51,30 @@ public class Account implements UserDetails {
     @Column(nullable = false)
     private Boolean emailVerified;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
     // Relationships
     @ManyToOne( cascade = CascadeType.ALL)
-    private User user; // TODO Implement user
+    private Customer customer;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
-    private Courier courier; // TODO: implement courier class
+    private Courier courier;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-    private List<Address> addresses; // TODO: Implement Address class
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY
+    )
+    private List<Address> addresses;
 
     @Column(name = "acc_non_locked", nullable = false)
     private boolean accountNonLocked = true;
 
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate(){

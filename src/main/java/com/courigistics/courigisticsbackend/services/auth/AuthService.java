@@ -1,12 +1,11 @@
 package com.courigistics.courigisticsbackend.services.auth;
 
-import com.courigistics.courigisticsbackend.dto.requests.AuthRequest;
-import com.courigistics.courigisticsbackend.dto.requests.PasswordResetRequest;
-import com.courigistics.courigisticsbackend.dto.requests.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
+import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.requests.auth.ResetPasswordRequest;
 import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
 
 /**
  * Service responsible for authentication-related operations including:
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service;
  *  - Sign out
  */
 
-@Service
+
 public interface AuthService {
 
     /**
@@ -31,7 +30,8 @@ public interface AuthService {
      * @throws IllegalArgumentException if the registration data is invalid
      * @throws RuntimeException if there is an error during registration
      */
-    Account registerUser(RegisterRequest request);
+    Account registerCustomer(RegisterRequest request);
+
 
 
     /**
@@ -68,11 +68,11 @@ public interface AuthService {
      * Generates a password reset token and triggers an email to be sent
      * @param email the user's email address
      */
-    void requestPasswordreset(String email);
+    void requestPasswordReset(String email);
 
     /**
      * Resets the user's password
      * @param request the password reset request containing the token and new password
      */
-    void resetPassword(PasswordResetRequest request);
+    void resetPassword(ResetPasswordRequest request);
 }
