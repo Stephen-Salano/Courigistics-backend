@@ -41,7 +41,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         VerificationToken verificationToken = VerificationToken.builder()
                 .account(account)
                 .token(generateSecureToken())
-                .tokenType(tokenType.toString())
+                .tokenType(tokenType)
                 .expiryDate(LocalDateTime.now().plusMinutes(expirationInMinutes))
                 .build();
         return verificationTokenRepository.save(verificationToken);
@@ -54,14 +54,14 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
                 // Condition 1: The token must not be expired
                 .filter(verificationToken -> verificationToken.getExpiryDate().isAfter(LocalDateTime.now()))
                 // Condition 2: The token must match the expected type
-                .filter(verificationToken -> verificationToken.getTokenType().equalsIgnoreCase(expectedType.toString()));
+                .filter(verificationToken -> verificationToken.getTokenType() == expectedType);
     }
 
     @Override
     public void invalidateTokens(Account account, TokenType tokenType) {
         // First we find any existing token for this account and type
         Optional<VerificationToken> existingToken = verificationTokenRepository
-                .findByAccountAndTokenTypes(account, tokenType);
+                .findByAccountAndTokenType(account, tokenType);
 
         // If found, delete
         existingToken.ifPresent(verificationTokenRepository::delete); // '::' is a pointer to the repository's delete method

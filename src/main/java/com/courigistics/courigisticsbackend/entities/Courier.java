@@ -1,5 +1,6 @@
 package com.courigistics.courigisticsbackend.entities;
 
+import com.courigistics.courigisticsbackend.entities.enums.CourierStatus;
 import com.courigistics.courigisticsbackend.entities.enums.EmploymentType;
 import com.courigistics.courigisticsbackend.entities.enums.PaymentType;
 import jakarta.persistence.*;
@@ -34,12 +35,16 @@ public class Courier {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "profile)_image", unique = true)
+    @Column(name = "profile_image", unique = true)
     private String profileImageUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", unique = true, nullable = false)
     private Account account;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private CourierStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "depot_id", nullable = false)
@@ -69,7 +74,7 @@ public class Courier {
     @Column(name = "max_deliveries_per_route")
     private Integer maxDeliveriesPerDay = 20;
 
-    @Column(name = "hired_At")
+    @Column(name = "hired_at")
     private LocalDateTime hiredAt;
 
     @Column(name = "fired_at")

@@ -1,30 +1,30 @@
-spring:
-  datasource:
-    url: ${DB_PROD_URL}
-    username: ${DB_PROD_USERNAME}
-    password: ${DB_PROD_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
-  # Mailing capabilities TODO: change to prod later
-  mail:
-    host: ${TEST_MAIL_HOST}
-    port: ${TEST_MAIL_PORT}
-    username: ${TEST_MAIL_USERNAME}
-    password: ${TEST_MAIL_PASSWORD}
-
-# Disable OpenAPI/Swagger in production for security
-springdoc:
-  api-docs:
-    enabled: false
-# Production logging (minimal)
-logging:
-  level:
-    com.stephensalano.fileflow_api: INFO
-    org.springframework.security: WARN
-    root: WARN
+#spring:
+#  datasource:
+#    url: ${DB_PROD_URL}
+#    username: ${DB_PROD_USERNAME}
+#    password: ${DB_PROD_PASSWORD}
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    show-sql: false
+#    properties:
+#      hibernate:
+#        format_sql: false
+#  # Mailing capabilities TODO: change to prod later
+#  mail:
+#    host: ${TEST_MAIL_HOST}
+#    port: ${TEST_MAIL_PORT}
+#    username: ${TEST_MAIL_USERNAME}
+#    password: ${TEST_MAIL_PASSWORD}
+#
+## Disable OpenAPI/Swagger in production for security
+#springdoc:
+#  api-docs:
+#    enabled: false
+## Production logging (minimal)
+#logging:
+#  level:
+#    com.stephensalano.fileflow_api: INFO
+#    org.springframework.security: WARN
+#    root: WARN

@@ -104,7 +104,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private void setAuthenticationContext(UserDetails userDetails, @NonNull HttpServletRequest request) {
 
 
-         /* creates an authentication object that Springboot understands
+        /* creates an authentication object that Springboot understands
          * It holds:
          * - UserDetails -> who the user is
          * - null -> no password required (jwt already authenticated them)
@@ -144,7 +144,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         validateAccountStatus(userDetails);
 
         Claims claims = jwtService.extractAllClaims(token);
-        
+
         // Security validation (IP, fingerprint, Issuer)
         if (!validateIssuer(claims)) {
             sendError(response, HttpServletResponse.SC_FORBIDDEN, "Security validation failed");

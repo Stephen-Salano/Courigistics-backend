@@ -17,8 +17,10 @@ import java.util.UUID;
 @Builder
 @Table(name = "deliveries", indexes = {
         @Index(name = "idx_delivery_number", columnList = "delivery_number"),
-        @Index(name = "idx_package_number", columnList = "tracking_number"),
-        @Index(name = "idx_sender_acc_id", columnList = "")
+        @Index(name = "idx_package_number", columnList = "package_id"),
+        @Index(name = "idx_sender_acc_id", columnList = "sender_acc_id"),
+        @Index(name = "idx_courier_id", columnList = "courier_id"),
+        @Index(name = "idx_created_at", columnList = "created_at")
 })
 public class Delivery {
     @Id
@@ -33,7 +35,7 @@ public class Delivery {
     private Packages packages;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_acc_id", unique = true, nullable = false)
+    @JoinColumn(name = "sender_acc_id", nullable = false)
     private Account sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,15 +49,15 @@ public class Delivery {
     private String recipientPhone;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "courier_id", unique = true, nullable = false, updatable = true)
-    private Account courier;
+    @JoinColumn(name = "courier_id", nullable = false, updatable = true)
+    private Courier courier;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origin_depot_id", unique = true, nullable = false)
+    @JoinColumn(name = "origin_depot_id", nullable = false)
     private Depot originDepot;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_depot_id", nullable = false, unique = true)
+    @JoinColumn(name = "destination_depot_id", nullable = false)
     private Depot destinationDepot;
 
     @Column(name = "delivery_mode")
@@ -67,7 +69,7 @@ public class Delivery {
     private RouteType routeType;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "pickup_address_id", unique = true, updatable = true, nullable = false)
+    @JoinColumn(name = "pickup_address_id", updatable = true, nullable = false)
     private Address pickupAddress;
 
     @Column(name = "pickup_lat")
@@ -96,7 +98,7 @@ public class Delivery {
     @Column(name = "estimated_price")
     private BigDecimal estimatedPrice;
 
-    @Column(name = "finalPrice")
+    @Column(name = "final_price")
     private BigDecimal finalPrice;
 
     @Column(name = "delivery_status")

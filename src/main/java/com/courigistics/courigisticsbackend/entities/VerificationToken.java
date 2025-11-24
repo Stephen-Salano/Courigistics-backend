@@ -1,5 +1,6 @@
 package com.courigistics.courigisticsbackend.entities;
 
+import com.courigistics.courigisticsbackend.entities.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,6 @@ import java.util.UUID;
 @Table(name = "verification_tokens")
 @Getter
 @Setter
-@RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,8 +27,9 @@ public class VerificationToken {
     @Column(unique = true, nullable = false)
     private String token;
 
+    @Enumerated(value = EnumType.STRING)
     @Column(name = "token_type", nullable = false)
-    private String tokenType;
+    private TokenType tokenType;
 
     @Column(name = "expiry_date", nullable = false)
     private LocalDateTime expiryDate;

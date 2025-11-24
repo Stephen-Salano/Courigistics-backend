@@ -29,6 +29,10 @@ spring:
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
+  data:
+    jdbc:
+      repositories:
+        enabled: false
 
 server:
   port: 8080

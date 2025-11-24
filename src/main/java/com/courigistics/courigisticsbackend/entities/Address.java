@@ -14,7 +14,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
+@Builder
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -42,6 +42,7 @@ public class Address {
     private String country;
 
     private Double latitude;
+
     private Double longitude;
 
     @Column(name = "is_default")

@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(name = "accounts", indexes = {
         @Index(name = "idx_account_email", columnList = "email"),
         @Index(name = "idx_account_phone", columnList = "phone"),
-        @Index(name = "idx_account_type", columnList = "account")
+        @Index(name = "idx_account_type", columnList = "account_type")
 
 })
 @Getter
@@ -26,7 +26,7 @@ import java.util.UUID;
 @Builder
 public class Account implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "username", nullable = false, unique = true)
@@ -56,7 +56,7 @@ public class Account implements UserDetails {
     private LocalDateTime lastLogin;
 
     // Relationships
-    @ManyToOne( cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private Customer customer;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)

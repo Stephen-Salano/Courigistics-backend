@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "vehicles", indexes = {
-        @Index(name = "idx_courier_id", columnList = "courier_id"),
         @Index(name = "idx_depot_id", columnList = "depot_id"),
         @Index(name = "idx_license_plate", columnList = "license_plate")
 })
@@ -29,9 +28,9 @@ public class Vehicles {
     @OneToOne(fetch = FetchType.LAZY)
     private Courier courier;
 
-    @JoinColumn(name = "depot_id", nullable = false, unique = true)
-    @OneToOne(fetch = FetchType.LAZY)
-    private  Depot depot;
+    @JoinColumn(name = "depot_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Depot depot;
 
     @Enumerated(EnumType.STRING)
     private VehicleType vehicleType;

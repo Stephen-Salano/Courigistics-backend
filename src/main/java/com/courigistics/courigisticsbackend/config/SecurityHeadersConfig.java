@@ -46,7 +46,6 @@ public class SecurityHeadersConfig extends OncePerRequestFilter {
             );
         }
         filterChain.doFilter(request, response);
-
     }
 
     private boolean isProduction() {

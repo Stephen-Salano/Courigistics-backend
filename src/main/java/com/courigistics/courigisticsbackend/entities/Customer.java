@@ -4,8 +4,6 @@ package com.courigistics.courigisticsbackend.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -20,9 +18,9 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", unique = true, nullable = false)
-    private List<Account> account;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, unique = true)
+    private Account account;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -30,6 +28,6 @@ public class Customer {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "profile)_image", unique = true)
+    @Column(name = "profile_image", unique = true)
     private String profileImageUrl;
 }
