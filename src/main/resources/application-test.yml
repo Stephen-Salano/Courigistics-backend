@@ -20,7 +20,6 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
-
   # Email configurations for testing (Mailtrap).
   # These values are self-contained for local dev but can be overridden by environment variables.
   mail:

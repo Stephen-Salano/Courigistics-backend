@@ -117,6 +117,8 @@ public class AuthServiceImpl implements AuthService {
 
         if (addressDTO.label().isBlank()){
             addressEntity.setLabel("Home address");
+        }else {
+            addressEntity.setLabel(addressDTO.label());
         }
         addressEntity.setAddressLine1(addressDTO.addressLine1());
         addressEntity.setAddressLine2(addressDTO.addressLine2());
