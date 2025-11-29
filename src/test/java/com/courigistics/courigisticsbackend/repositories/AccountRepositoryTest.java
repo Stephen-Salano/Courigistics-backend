@@ -98,4 +98,12 @@ public class AccountRepositoryTest {
         Assertions.assertThat(user.get().getEmail()).isEqualTo(testAccount.getEmail()); // is the right email
     }
 
+    @Test
+    @DisplayName("Given existing username should return true")
+    public void existsByUsername_givenExistingUsername_returnTrue(){
+        boolean exists = accountRepository.existsByUsername(testAccount.getUsername());
+        // Assert
+        Assertions.assertThat(exists).isTrue();
+    }
+
 }
