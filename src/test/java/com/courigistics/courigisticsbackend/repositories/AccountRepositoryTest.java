@@ -106,4 +106,12 @@ public class AccountRepositoryTest {
         Assertions.assertThat(exists).isTrue();
     }
 
+    @Test
+    @DisplayName("Given existing email should return true")
+    public void existsByEmail_givenExistingEmail_returnTrue(){
+        boolean exists = accountRepository.existsByEmail(testAccount.getEmail());
+        // Assert
+        Assertions.assertThat(exists).isTrue();
+    }
+
 }
