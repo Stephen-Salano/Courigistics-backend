@@ -28,8 +28,10 @@ public record RegisterRequest(
         @Size(min = 5, max = 20)
         String nationalId,
 
+        @NotBlank(message = "Phone number is required")
+        // TODO: remember to add custom validation for phone numbers
+        String phoneNumber,
         // Addresses
-        @NotBlank(message = "Address must be entered")
         AddressDTO addressDTO
 
 ) {

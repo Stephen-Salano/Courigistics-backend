@@ -52,20 +52,24 @@ public class AuthServiceImpl implements AuthService {
             validateRegistrationData(request);
             log.debug("Validation passed: username/email are free.");
 
-            // Create and save the customer entity
-            Customer customer = createCustomer(request);
-            log.debug("Attempting to save customer entity: {}", customer);
-            Customer savedCustomer = customerRepository.save(customer);
+            // 1. Create all related entities in memory first
+            Account account = createAccount(request);
+            Customer customer = createCustomer(request, account);
+            Address address = createAddressEntity(request.addressDTO(), account);
 
-            // Create and save the account entity
-            Account customerAccount = createAccount(request, savedCustomer);
-            log.debug("Attempting to save Account entity: {}", customerAccount);
-            log.debug("Saved Account: {}", savedCustomer);
+            // 2. Establish bidirectional relationships
+            account.setCustomer(customer);
+            account.setAddresses(List.of(address));
+
+            // 3. Save the parent entity. Cascade will handle the rest.
+            log.debug("Attempting to save Account and cascade to Customer and Address.");
+            Account savedAccount = accountRepository.save(account);
+            log.debug("Saved Account with ID: {}", savedAccount.getId());
 
             // Generating the verification token
-            log.debug("Creating Verification token for accountId={}", savedCustomer.getId());
+            log.debug("Creating Verification token for accountId={}", savedAccount.getId());
             VerificationToken verificationToken = verificationTokenService.createToken(
-                    customerAccount, TokenType.EMAIL_VERIFICATION
+                    savedAccount, TokenType.EMAIL_VERIFICATION
             );
             log.debug("Created verificationToken: token={} expiresAt={}",
                     verificationToken.getToken(),
@@ -73,38 +77,34 @@ public class AuthServiceImpl implements AuthService {
             );
 
             // TODO: Add event publisher that will handle sending the email for verification
-            log.info("Registration completed for user: {}", customerAccount);
-            return customerAccount;
+            log.info("Registration completed for user: {}", savedAccount.getUsername());
+            return savedAccount;
         } catch (Exception e){
             log.error("Registration failed inside registerCustomer(): {}", e.getMessage());
             throw e;
         }
     }
 
-    private Customer createCustomer(RegisterRequest request) {
+    private Customer createCustomer(RegisterRequest request, Account account) {
         return Customer.builder()
                 .firstName(request.firstName())
                 .lastName(request.lastName())
+                .account(account)
                 .build();
     }
 
 
-    private Account createAccount(RegisterRequest request, Customer savedCustomer) {
-         Account account = Account.builder()
-                .customer(savedCustomer)
+    private Account createAccount(RegisterRequest request) {
+         return Account.builder()
                 .username(request.username())
                 .email(request.email())
+                .phone(request.phoneNumber()) // Added missing phone number
                 .password(passwordEncoder.encode(request.password()))
-                //.addresses()
                 .accountType(AccountType.CUSTOMER)
-                .enabled(true)
+                .enabled(false) // Should be false until email is verified
+                .emailVerified(false)
                 .accountNonLocked(true)
                 .build();
-
-         // Building the address entity
-        Address addressEntity = createAddressEntity(request.addressDTO(), account);
-        account.setAddresses(List.of(addressEntity));
-        return account;
     }
 
     private Address createAddressEntity(
