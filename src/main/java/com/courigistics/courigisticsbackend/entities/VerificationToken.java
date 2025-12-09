@@ -35,6 +35,7 @@ public class VerificationToken {
     private LocalDateTime expiryDate;
 
     @Column(nullable = false)
+    @Builder.Default // Tells Lombok to include the field's default value in the generated builder
     private Boolean used = false;
 
     @Column(name = "created_at", updatable = false)

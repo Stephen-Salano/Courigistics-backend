@@ -47,12 +47,12 @@ public class AuthServiceImplTests {
     @Mock
     private VerificationTokenService verificationTokenService;
 
-    private AddressDTO validAddress;
-    private RegisterRequest validCustomerRegisterRequest;
-
-    @BeforeEach
-    public void setUpCustomerAcc(){
-         validAddress = new AddressDTO(
+    /**
+     * Helper method to create an RegistrationRequest with a valid Adrress
+     * @return the registerRequest for account creation with valid Address
+     */
+    private RegisterRequest createValidRegisterRequestWithAddress(){
+        AddressDTO validAddress = new AddressDTO(
                 "home",
                 "123 Avery Lane",
                 "1234 Avery Lane 2",
@@ -61,7 +61,8 @@ public class AuthServiceImplTests {
                 "Kenya",
                 true
         );
-         validCustomerRegisterRequest = new RegisterRequest(
+
+        return new RegisterRequest(
                 "testuser@gmail.com",
                 "testusr",
                 "testUser254$",
@@ -71,35 +72,50 @@ public class AuthServiceImplTests {
                 "01234567890",
                 validAddress
         );
-
-
     }
+
+    private RegisterRequest createValidregisterRequestWithoutAddress(){
+        return new RegisterRequest(
+                "testuser@gmail.com",
+                "testusr",
+                "testUser254$",
+                "test",
+                "user",
+                "1234567890",
+                "01234567890",
+                null
+        );
+    }
+
+
 
     @Test
     @DisplayName("Happy path registration")
     public void registerCustomer_withValidAndUniqueData_shouldCreateAccountSuccessfully(){
-        
+
+        RegisterRequest request = createValidRegisterRequestWithAddress();
+
         // --- ARRANGE ---
         // 1. Mock repository checks for username/email
-        Mockito.when(accountRepository.existsByUsername(validCustomerRegisterRequest.username())).thenReturn(false);
-        Mockito.when(accountRepository.existsByEmail(validCustomerRegisterRequest.email())).thenReturn(false);
+        Mockito.when(accountRepository.existsByUsername(request.username())).thenReturn(false);
+        Mockito.when(accountRepository.existsByEmail(request.email())).thenReturn(false);
 
         // 2. Mock password encoding
         String hashedPassword = "hashedPassword123";
-        Mockito.when(passwordEncoder.encode(validCustomerRegisterRequest.password())).thenReturn(hashedPassword);
+        Mockito.when(passwordEncoder.encode(request.password())).thenReturn(hashedPassword);
 
         // 3. Mock the account saving to return the account that was passed to it
         // `thenAnswer()`calculates he return value dynamically at the moment the method is called
         // invocation.getArgument(0) -> inside he answer block, invocation represents the specific method call being made
         //  `.getArgument(0)` retrieves the first argument passed to the save method
-        Mockito.when(accountRepository.save(Mockito.any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // 4. Mock the token creation
-        Mockito.when(verificationTokenService.createToken(Mockito.any(Account.class), Mockito.eq(TokenType.EMAIL_VERIFICATION)))
+        Mockito.when(verificationTokenService.createToken(any(Account.class), Mockito.eq(TokenType.EMAIL_VERIFICATION)))
                 .thenReturn(new VerificationToken()); // Return a dummy token
 
         // --- ACT ---
-        Account resultAccount = authService.registerCustomer(validCustomerRegisterRequest);
+        Account resultAccount = authService.registerCustomer(request);
 
         // --- ASSERT ---
         // Verify the returned account is correctly configured
@@ -113,15 +129,44 @@ public class AuthServiceImplTests {
         verify(verificationTokenService).createToken(resultAccount, TokenType.EMAIL_VERIFICATION);
     }
 
+    @Test
+    public void registerCustomer_withNoAddressInformation_shouldCreateAccount(){
+        RegisterRequest request = createValidregisterRequestWithoutAddress();
+        String hashedPassword = "hashedPassword123";
+        
+        // Mocks
+        Mockito.when(accountRepository.existsByUsername(request.username())).thenReturn(false);
+        Mockito.when(accountRepository.existsByEmail(request.email())).thenReturn(false);
+        Mockito.when(passwordEncoder.encode(request.password())).thenReturn(hashedPassword);
+        Mockito.when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.when(verificationTokenService.createToken(any(Account.class), Mockito.eq(TokenType.EMAIL_VERIFICATION)))
+                .thenReturn(new VerificationToken()); // Return a dummy token
+
+        Account resultAccount = authService.registerCustomer(request);
+
+        // Assertions
+        assertNotNull(resultAccount);
+        assertEquals("testusr", resultAccount.getUsername());
+        assertFalse(resultAccount.getEnabled(), "Account should be disabled until email verification");
+        assertFalse(resultAccount.getEmailVerified(), "Email should not be verified yet");
+        assertNull(resultAccount.getAddresses());
+
+        verify(accountRepository).save(any()); // save was never called
+        verify(verificationTokenService).createToken(resultAccount, TokenType.EMAIL_VERIFICATION); // token creation was never called
+
+    }
+
     /**
      * The goal is to prevent duplicate
      */
     @Test
     public void registerCustomer_withExistingUsername_shouldThrowException(){
-        Mockito.when(accountRepository.existsByUsername(validCustomerRegisterRequest.username())).thenReturn(true);
+        RegisterRequest request = createValidRegisterRequestWithAddress();
+
+        Mockito.when(accountRepository.existsByUsername(request.username())).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () ->{
-            authService.registerCustomer(validCustomerRegisterRequest);
+            authService.registerCustomer(request);
         });
 
         // verify that save was never called

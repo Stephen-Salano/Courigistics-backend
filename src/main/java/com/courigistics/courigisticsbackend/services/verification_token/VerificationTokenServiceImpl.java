@@ -43,6 +43,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
                 .token(generateSecureToken())
                 .tokenType(tokenType)
                 .expiryDate(LocalDateTime.now().plusMinutes(expirationInMinutes))
+                .used(false) // Explicitly set the value
                 .build();
         return verificationTokenRepository.save(verificationToken);
     }

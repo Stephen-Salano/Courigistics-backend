@@ -55,11 +55,18 @@ public class AuthServiceImpl implements AuthService {
             // 1. Create all related entities in memory first
             Account account = createAccount(request);
             Customer customer = createCustomer(request, account);
-            Address address = createAddressEntity(request.addressDTO(), account);
 
             // 2. Establish bidirectional relationships
             account.setCustomer(customer);
-            account.setAddresses(List.of(address));
+
+            // Conditionally create and link address:
+            if (request.addressDTO() != null){
+                log.debug("AddressDTO provided, creating and linking address.");
+                Address address = createAddressEntity(request.addressDTO(), account);
+                account.setAddresses(List.of(address));
+            }else {
+                log.debug("No AddressDTO provided, skipping address creation");
+            }
 
             // 3. Save the parent entity. Cascade will handle the rest.
             log.debug("Attempting to save Account and cascade to Customer and Address.");

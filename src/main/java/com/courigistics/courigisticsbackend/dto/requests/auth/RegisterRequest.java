@@ -1,6 +1,8 @@
 package com.courigistics.courigisticsbackend.dto.requests.auth;
 
 import com.courigistics.courigisticsbackend.dto.requests.AddressDTO;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 public record RegisterRequest(
@@ -20,18 +22,19 @@ public record RegisterRequest(
         @Size(max = 50, message = "First name cannot exceed 50 characters")
         String firstName,
 
-        @NotBlank(message = "Last name is equired")
+        @NotBlank(message = "Last name is required")
         @Size(max = 50, message = "Last name cannot exceed 50 characters")
         String lastName,
 
-        @NotBlank(message = "Id is required" )
+        @NotBlank(message = "National ID is required" )
         @Size(min = 5, max = 20)
         String nationalId,
 
         @NotBlank(message = "Phone number is required")
-        // TODO: remember to add custom validation for phone numbers
+        @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Phone number must be valid") // Basic phone number validation
         String phoneNumber,
         // Addresses
+        @Valid
         AddressDTO addressDTO
 
 ) {
