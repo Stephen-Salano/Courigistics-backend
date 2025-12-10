@@ -1,7 +1,6 @@
 package com.courigistics.courigisticsbackend.dto.requests.auth;
 
 import com.courigistics.courigisticsbackend.dto.requests.AddressDTO;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 

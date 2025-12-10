@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
             log.debug("Validation passed: username/email are free.");
 
             // 1. Create all related entities in memory first
-            Account account = createAccount(request);
+            Account account = createCustomerAccount(request);
             Customer customer = createCustomer(request, account);
 
             // 2. Establish bidirectional relationships
@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    private Account createAccount(RegisterRequest request) {
+    private Account createCustomerAccount(RegisterRequest request) {
          return Account.builder()
                 .username(request.username())
                 .email(request.email())

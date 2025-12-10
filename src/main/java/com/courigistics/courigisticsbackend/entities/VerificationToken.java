@@ -4,7 +4,6 @@ import com.courigistics.courigisticsbackend.entities.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 

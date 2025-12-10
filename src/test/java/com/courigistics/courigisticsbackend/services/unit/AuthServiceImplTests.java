@@ -9,17 +9,13 @@ import com.courigistics.courigisticsbackend.entities.enums.TokenType;
 import com.courigistics.courigisticsbackend.repositories.AccountRepository;
 import com.courigistics.courigisticsbackend.services.auth.AuthServiceImpl;
 import com.courigistics.courigisticsbackend.services.verification_token.VerificationTokenService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,7 +87,7 @@ public class AuthServiceImplTests {
 
     @Test
     @DisplayName("Happy path registration")
-    public void registerCustomer_withValidAndUniqueData_shouldCreateAccountSuccessfully(){
+    public void registerCustomer_withValidAndUniqueData_shouldCreateCustomerAccountSuccessfully(){
 
         RegisterRequest request = createValidRegisterRequestWithAddress();
 
@@ -130,7 +126,7 @@ public class AuthServiceImplTests {
     }
 
     @Test
-    public void registerCustomer_withNoAddressInformation_shouldCreateAccount(){
+    public void registerCustomer_withNoAddressInformation_shouldCreateCustomerAccount(){
         RegisterRequest request = createValidregisterRequestWithoutAddress();
         String hashedPassword = "hashedPassword123";
         

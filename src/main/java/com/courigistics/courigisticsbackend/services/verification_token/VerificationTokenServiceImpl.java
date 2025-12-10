@@ -84,7 +84,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         //create a byte array for the random bytes
         byte[] randomBytes = new byte[tokenLength];
         // Fill with secure random values
-        secureRandom.nextBytes(randomBytes);;
+        secureRandom.nextBytes(randomBytes);
         // Encoding using base64URL-safe encoding and return as String
         return Base64 // This means we embed this token directly in links
                 .getUrlEncoder()  // choose URL and filename safe Base64 variant
