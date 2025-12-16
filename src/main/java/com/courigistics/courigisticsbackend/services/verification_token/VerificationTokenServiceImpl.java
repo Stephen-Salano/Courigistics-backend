@@ -37,7 +37,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         // First we invalidate any existing tokens of the same type for this account
         invalidateTokens(account, tokenType);
 
-        // create a new token with a secure random value and exoiration time
+        // create a new token with a secure random value and expiration time
         VerificationToken verificationToken = VerificationToken.builder()
                 .account(account)
                 .token(generateSecureToken())

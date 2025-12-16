@@ -30,7 +30,7 @@ public interface AuthService {
      * @throws IllegalArgumentException if the registration data is invalid
      * @throws RuntimeException if there is an error during registration
      */
-    Account registerCustomer(RegisterRequest request);
+    Account registerAccount(RegisterRequest request);
 
 
 

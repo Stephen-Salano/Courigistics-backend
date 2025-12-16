@@ -1,13 +1,20 @@
 package com.courigistics.courigisticsbackend.services.unit;
 
 
+import com.courigistics.courigisticsbackend.config.security.JwtService;
 import com.courigistics.courigisticsbackend.dto.requests.AddressDTO;
+import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
+import com.courigistics.courigisticsbackend.entities.Customer;
+import com.courigistics.courigisticsbackend.entities.RefreshToken;
 import com.courigistics.courigisticsbackend.entities.VerificationToken;
+import com.courigistics.courigisticsbackend.entities.enums.AccountType;
 import com.courigistics.courigisticsbackend.entities.enums.TokenType;
 import com.courigistics.courigisticsbackend.repositories.AccountRepository;
-import com.courigistics.courigisticsbackend.services.auth.AuthServiceImpl;
+import com.courigistics.courigisticsbackend.repositories.RefreshTokenRepository;
+import com.courigistics.courigisticsbackend.services.auth.CustomerAuthServiceImpl;
 import com.courigistics.courigisticsbackend.services.verification_token.VerificationTokenService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,12 +23,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Test examples:
@@ -29,10 +40,10 @@ import static org.mockito.Mockito.verify;
  * 2. Input validation scenarios
  */
 @ExtendWith(MockitoExtension.class)
-public class AuthServiceImplTests {
+public class CustomerAuthServiceImplTests {
 
     @InjectMocks
-    AuthServiceImpl authService;
+    CustomerAuthServiceImpl authService;
 
     @Mock
     private AccountRepository accountRepository;
@@ -42,6 +53,18 @@ public class AuthServiceImplTests {
     
     @Mock
     private VerificationTokenService verificationTokenService;
+
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
+
+    @Mock
+    private Authentication mockAuthentication;
 
     /**
      * Helper method to create an RegistrationRequest with a valid Adrress
@@ -83,11 +106,18 @@ public class AuthServiceImplTests {
         );
     }
 
+    private AuthRequest createValidAuthRequest(){
+        return new AuthRequest(
+                "testusr",
+                "testUser254$"
+        );
+    }
+
 
 
     @Test
     @DisplayName("Happy path registration")
-    public void registerCustomer_withValidAndUniqueData_shouldCreateCustomerAccountSuccessfully(){
+    public void registerCustomer_withValidAndUniqueData_shouldCreateAccountAccountSuccessfully(){
 
         RegisterRequest request = createValidRegisterRequestWithAddress();
 
@@ -111,7 +141,7 @@ public class AuthServiceImplTests {
                 .thenReturn(new VerificationToken()); // Return a dummy token
 
         // --- ACT ---
-        Account resultAccount = authService.registerCustomer(request);
+        Account resultAccount = authService.registerAccount(request);
 
         // --- ASSERT ---
         // Verify the returned account is correctly configured
@@ -126,7 +156,7 @@ public class AuthServiceImplTests {
     }
 
     @Test
-    public void registerCustomer_withNoAddressInformation_shouldCreateCustomerAccount(){
+    public void registerCustomer_withNoAddressInformation_shouldCreateAccountAccount(){
         RegisterRequest request = createValidregisterRequestWithoutAddress();
         String hashedPassword = "hashedPassword123";
         
@@ -138,7 +168,7 @@ public class AuthServiceImplTests {
         Mockito.when(verificationTokenService.createToken(any(Account.class), Mockito.eq(TokenType.EMAIL_VERIFICATION)))
                 .thenReturn(new VerificationToken()); // Return a dummy token
 
-        Account resultAccount = authService.registerCustomer(request);
+        Account resultAccount = authService.registerAccount(request);
 
         // Assertions
         assertNotNull(resultAccount);
@@ -156,17 +186,69 @@ public class AuthServiceImplTests {
      * The goal is to prevent duplicate
      */
     @Test
-    public void registerCustomer_withExistingUsername_shouldThrowException(){
+    public void registerAccount_withExistingUsername_shouldThrowException(){
         RegisterRequest request = createValidRegisterRequestWithAddress();
 
         Mockito.when(accountRepository.existsByUsername(request.username())).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () ->{
-            authService.registerCustomer(request);
+            authService.registerAccount(request);
         });
 
         // verify that save was never called
         verify(accountRepository, never()).save(any());
     }
+
+    @Test
+    public void loginAccount_withExistingAccountDetails_shouldSucceed(){
+        AuthRequest loginRequest = createValidAuthRequest();
+
+        Customer sampleCustomer = new Customer().builder()
+                .firstName("john")
+                .lastName("doe")
+                .profileImageUrl("/profile/")
+                .build();
+
+        // create the expected user account that will be "authenticated"
+        Account authenticatedAccount = new Account().builder()
+                .username("testusr")
+                .email("testuser@gmail.com")
+                .enabled(true)
+                .accountType(AccountType.CUSTOMER)
+                .emailVerified(true)
+                .customer(sampleCustomer)
+                .build();
+
+        // Mock behavior
+        Mockito.when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).
+                thenReturn(mockAuthentication);
+        Mockito.when(mockAuthentication.getPrincipal()).thenReturn(authenticatedAccount);
+        Mockito.when(accountRepository.findByUsername("testusr")).thenReturn(Optional.of(authenticatedAccount));
+        Mockito.when(jwtService.generateAccessToken(authenticatedAccount)).thenReturn("dummy-access-token");
+        Mockito.when(jwtService.generateRefreshToken(authenticatedAccount)).thenReturn("dummy-refresh-token");
+        Mockito.when(jwtService.getAccessTokenExpiration()).thenReturn(3600000L);
+
+        // ACT
+        AuthResponse response = authService.login(loginRequest);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("dummy-access-token", response.accessToken());
+        assertEquals("dummy-refresh-token", response.refreshToken());
+        assertEquals("testusr", response.username());
+        assertEquals(3600, response.expiresIn());
+
+        // Verify that key methods were called on the mocks
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(refreshTokenRepository).invalidateAllByAccount(authenticatedAccount);
+        verify(refreshTokenRepository).save(any(RefreshToken.class));
+        verify(jwtService).generateAccessToken(authenticatedAccount);
+    }
+
+    /*
+    TODO: Implement tests for:
+        - throw IllegalArgumentException for invalid credentials
+        - throw IllegalArgumentException for disabled account
+     */
 
 }
