@@ -167,4 +167,24 @@ public class CustomerAuthController {
         }
 
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(Authentication authentication){
+        try{
+            authService.logout(authentication);
+            return ResponseEntity.ok(Map.of(
+                    "success", "true",
+                    "message", "logout successful"
+            ));
+        } catch (Exception e){
+            log.error("Error during logout: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "success", "true",
+                            "message", "logout failed due to a server error"
+                    ));
+        }
+    }
+
+
 }

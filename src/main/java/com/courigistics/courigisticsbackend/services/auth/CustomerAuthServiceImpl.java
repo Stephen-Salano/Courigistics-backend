@@ -255,8 +255,15 @@ public class CustomerAuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void logout(Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof Account account){
+            log.info("Logout requested for user:{}", account.getUsername());
 
+            // Invalidate all refresh tokens for this account
+            refreshTokenRepository.invalidateAllByAccount(account);
+            log.info("Logout successful for user:{}", account.getUsername());
+        }
     }
 
     @Override
