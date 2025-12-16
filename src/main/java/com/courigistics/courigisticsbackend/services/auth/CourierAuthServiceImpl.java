@@ -7,7 +7,6 @@ import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,8 @@
 package com.courigistics.courigisticsbackend.controllers;
 
+import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
 import com.courigistics.courigisticsbackend.services.auth.AuthService;
 import jakarta.validation.Valid;
@@ -11,6 +13,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -110,5 +114,57 @@ public class CustomerAuthController {
                             "message", "Verification failed due to server error. Please try again later"
                     ));
         }
+    }
+
+    @PostMapping("/login/customer")
+    public ResponseEntity<Map<String, Object>> login(
+            @Valid @RequestBody AuthRequest authRequest
+            ){
+        Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // We check if a user is already authenticated and not an anonymous user
+        // "anonymous" is he default principal for unauthenticated users in Spring Security
+        if (currentAuthentication != null && currentAuthentication.isAuthenticated() &&
+                !currentAuthentication.getPrincipal().equals("anonymousUser")){
+            log.warn("Login attempt by already authenticated user: {}", currentAuthentication.getName());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", "You are already logged in."
+                            // TODO: Remember to introduce redirection on trying to login already
+                    ));
+        }
+        log.info("Login attempt for: {}", authRequest.usernameOrEmail());
+        try{
+            AuthResponse authResponse = authService.login(authRequest);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", "true",
+                    "message", "Login successful",
+                    "data", authResponse
+            ));
+        } catch (IllegalArgumentException e){
+            log.warn("Login failed for {}: {}", authRequest.usernameOrEmail(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", e.getMessage()
+                    ));
+        } catch (IllegalStateException e){
+            log.warn("Account not verified for {}:{}", authRequest.usernameOrEmail(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", e.getMessage()
+                    ));
+        }catch (Exception e){
+            log.error("Unexpected error during login for {}:{}", authRequest.usernameOrEmail(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", "Login failed due to server error. Please try again later"
+                    ));
+        }
+
     }
 }
