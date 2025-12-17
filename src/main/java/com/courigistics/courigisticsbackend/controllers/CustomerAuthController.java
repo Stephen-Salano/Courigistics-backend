@@ -1,6 +1,7 @@
 package com.courigistics.courigisticsbackend.controllers;
 
 import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
+import com.courigistics.courigisticsbackend.dto.requests.auth.ForgotPasswordRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
 import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
@@ -229,6 +230,18 @@ public class CustomerAuthController {
                             "message", "Token refresh failed due to server error"
                     ));
         }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest
+            ){
+        log.info("Forgot password request received for email: {}", forgotPasswordRequest.email());
+        authService.requestPasswordReset(forgotPasswordRequest.email());
+        return ResponseEntity.ok(Map.of(
+                "success", "true",
+                "message", "If an account with that email exist, a password reset link has been sent"
+        ));
     }
 
 

@@ -307,6 +307,20 @@ public class CustomerAuthServiceImpl implements AuthService {
 
     @Override
     public void requestPasswordReset(String email) {
+        log.info("Password reset requested for email: {}", email);
+        Account account = accountRepository.findByEmail(email)
+                .orElse(null); //
+
+        if (account != null){
+            // Generate password reset token
+            VerificationToken resetToken = verificationTokenService.createToken(account, TokenType.PASSWORD_RESET);
+            log.info("Password reset token: {}", resetToken.getToken());
+
+            // TODO: Add Event publisher to send email with the password reset link
+            log.info("Password reset link created for user:{}. Password reset email will be sent", account.getUsername());
+        }else {
+            log.warn("Password reset requested for non-existent email: {}", email);
+        }
 
     }
 
