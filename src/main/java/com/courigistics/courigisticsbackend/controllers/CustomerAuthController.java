@@ -186,5 +186,50 @@ public class CustomerAuthController {
         }
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, Object>> refreshToken(
+            @RequestBody Map<String, String> requestBody
+    ){
+        String refreshToken = requestBody.get("refresh_token");
+
+        if (refreshToken == null || refreshToken.trim().isEmpty()){
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "success", "false",
+                            "message", "refresh token is required"
+                    )
+            );
+        }
+
+        try {
+            AuthResponse authResponse = authService.refreshToken(refreshToken);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success", "true",
+                            "message", "Token refreshed successfully",
+                            "data", authResponse
+                    )
+            );
+        } catch (IllegalArgumentException e){
+            log.warn("Token refresh failed {}", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", e.getMessage()
+                    ));
+
+        }catch (Exception e){
+            log.error("Unexpected error during token refresh: {}", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", "Token refresh failed due to server error"
+                    ));
+        }
+    }
+
 
 }

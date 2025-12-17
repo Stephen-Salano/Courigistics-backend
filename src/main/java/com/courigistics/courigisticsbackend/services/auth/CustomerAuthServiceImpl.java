@@ -223,8 +223,14 @@ public class CustomerAuthServiceImpl implements AuthService {
             String accessToken = jwtService.generateAccessToken(account);
             String refreshToken = jwtService.generateRefreshToken(account);
 
-            // Save the refresh token to the database
-            saveRefreshToken(account, refreshToken);
+            /**
+             * Becuase we are saving the Refresh token to the DB, we have to build the entity
+             * - We associate the RefreshToken with an account
+             * - The actual token created by `jwtService.generateRefreshToken()` is stored in the RefreshToken entity
+             *      as the token string
+             * - Then we save the token
+             */
+           createAndSaveRefreshToken(account, refreshToken);
 
             // TODO: Add device fingerprint for unknown login alerts to users
             log.info("Login successful for user:{}", account.getUsername());
@@ -238,10 +244,7 @@ public class CustomerAuthServiceImpl implements AuthService {
         }
     }
 
-    private void saveRefreshToken(Account account, String refreshToken) {
-        // Invalidate all previous refreshToken for this user for enhanced security
-        refreshTokenRepository.invalidateAllByAccount(account);
-
+    private void createAndSaveRefreshToken(Account account, String refreshToken) {
         // create a new RefreshToken
         RefreshToken newRefreshToken = RefreshToken.builder()
                 .account(account)
@@ -268,7 +271,38 @@ public class CustomerAuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse refreshToken(String refreshToken) {
-        return null;
+        log.debug("Token refresh attempt for user");
+
+        // Find the refresh token in the database
+        RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+
+        // Check if token is expired or invalidated
+        if (storedToken.isExpired() || storedToken.isInvalidated()){
+            log.warn("Expired or invalidated refresh token used");
+            throw new IllegalArgumentException("Refresh token expired or invalid");
+        }
+
+        // Invalidate the old token that was just used
+        storedToken.setInvalidated(true);
+        // save again so that the old token is marked as invalid
+        refreshTokenRepository.save(storedToken);
+
+        // Get the associated account from the token
+        Account account = storedToken.getAccount();
+
+        // Generate new tokens
+        String newAccessToken = jwtService.generateAccessToken(account);
+        String newRefreshToken = jwtService.generateRefreshToken(account);
+
+        createAndSaveRefreshToken(account, newRefreshToken);
+        log.info("New refresh token successfully saved to DB");
+        log.info("Token refreshed successfully for user: {}", account.getUsername());
+
+        return AuthResponse.of(
+                newAccessToken, newRefreshToken, jwtService.getAccessTokenExpiration() / 100,
+                account.getUsername(), account.getEmail(), account.getAccountType().name()
+        );
     }
 
     @Override
