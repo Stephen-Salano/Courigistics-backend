@@ -13,6 +13,7 @@ import com.courigistics.courigisticsbackend.repositories.AccountRepository;
 import com.courigistics.courigisticsbackend.repositories.CustomerRepository;
 import com.courigistics.courigisticsbackend.repositories.RefreshTokenRepository;
 import com.courigistics.courigisticsbackend.services.verification_token.VerificationTokenService;
+import com.courigistics.courigisticsbackend.utils.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -325,7 +326,32 @@ public class CustomerAuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void resetPassword(ResetPasswordRequest request) {
+        log.info("Attempting to reset password with a token");
 
+         // Serverside validation check for matching passwords
+        ValidationUtils.validatePasswordsMatch(request.newPassword(), request.confirmPassword());
+
+        // Validate the token and ensure it's a PASSWORD_RESET token
+        VerificationToken verificationToken = verificationTokenService.validateToken(request.token(), TokenType.PASSWORD_RESET)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset token"));
+
+        log.info("Attempting to get account from token");
+        Account account = verificationToken.getAccount();
+        log.info("Account :{} with associate token found",account.getUsername());
+
+        // TODO: Incase of cache, evict users
+        // set the new password
+        account.setPassword(passwordEncoder.encode(request.newPassword()));
+        account.setAccountNonLocked(true);
+        // TODO: Set failed login attempts
+        accountRepository.save(account);
+
+        // Invalidate all refresh token for this user
+        refreshTokenRepository.invalidateAllByAccount(account);
+
+        // TODO: Add publisher for email sending
+        log.info("Password reset successful for user: {}", account.getUsername());
     }
 }

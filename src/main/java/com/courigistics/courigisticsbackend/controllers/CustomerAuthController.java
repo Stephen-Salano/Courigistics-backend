@@ -3,6 +3,7 @@ package com.courigistics.courigisticsbackend.controllers;
 import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.ForgotPasswordRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.requests.auth.ResetPasswordRequest;
 import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
 import com.courigistics.courigisticsbackend.services.auth.AuthService;
@@ -232,7 +233,7 @@ public class CustomerAuthController {
         }
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/forgot-password/customer")
     public ResponseEntity<Map<String, Object>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest
             ){
@@ -244,5 +245,32 @@ public class CustomerAuthController {
         ));
     }
 
-
+    @PostMapping("/reset-password/customer")
+    public ResponseEntity<Map<String, Object>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request
+            ){
+        try{
+            authService.resetPassword(request);
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success", "true",
+                            "message", "Your password has been reset successfully. You can now login"
+                    )
+            );
+        }catch (IllegalArgumentException e){
+            log.warn("Password reset failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", e.getMessage()
+                    ));
+        }catch (Exception e){
+            log.warn("Unexpected server error durng password reset: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "success", "false",
+                            "message", "Password reset failed due to error. Please try again later"
+                    ));
+        }
+    }
 }
