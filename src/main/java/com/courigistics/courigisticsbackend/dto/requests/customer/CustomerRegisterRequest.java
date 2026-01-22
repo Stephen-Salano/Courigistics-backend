@@ -1,10 +1,10 @@
-package com.courigistics.courigisticsbackend.dto.requests.auth;
+package com.courigistics.courigisticsbackend.dto.requests.customer;
 
-import com.courigistics.courigisticsbackend.dto.requests.AddressDTO;
+import com.courigistics.courigisticsbackend.dto.requests.common.AddressDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
-public record RegisterRequest(
+public record CustomerRegisterRequest(
         @NotBlank(message = "Email cannot be blank")
         @Email
         String email,

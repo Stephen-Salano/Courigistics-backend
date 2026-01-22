@@ -1,10 +1,10 @@
 package com.courigistics.courigisticsbackend.controllers;
 
-import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
+import com.courigistics.courigisticsbackend.dto.requests.auth.LoginRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.ForgotPasswordRequest;
-import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.requests.customer.CustomerRegisterRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.ResetPasswordRequest;
-import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
+import com.courigistics.courigisticsbackend.dto.responses.auth.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
 import com.courigistics.courigisticsbackend.services.auth.AuthService;
 import jakarta.validation.Valid;
@@ -34,7 +34,7 @@ public class CustomerAuthController {
 
     @PostMapping("/register/customer")
     public ResponseEntity<Map<String, Object>> registerCustomer(
-            @Valid @RequestBody RegisterRequest registerCustomerRequest
+            @Valid @RequestBody CustomerRegisterRequest registerCustomerRequest
             ){
         // log incoming registration attempt (without sensitive data)
         log.info("Registration attempt for username: {}", registerCustomerRequest.username());
@@ -120,7 +120,7 @@ public class CustomerAuthController {
 
     @PostMapping("/login/customer")
     public ResponseEntity<Map<String, Object>> login(
-            @Valid @RequestBody AuthRequest authRequest
+            @Valid @RequestBody LoginRequest loginRequest
             ){
         Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -136,9 +136,9 @@ public class CustomerAuthController {
                             // TODO: Remember to introduce redirection on trying to login already
                     ));
         }
-        log.info("Login attempt for: {}", authRequest.usernameOrEmail());
+        log.info("Login attempt for: {}", loginRequest.usernameOrEmail());
         try{
-            AuthResponse authResponse = authService.login(authRequest);
+            AuthResponse authResponse = authService.login(loginRequest);
 
             return ResponseEntity.ok(Map.of(
                     "success", "true",
@@ -146,21 +146,21 @@ public class CustomerAuthController {
                     "data", authResponse
             ));
         } catch (IllegalArgumentException e){
-            log.warn("Login failed for {}: {}", authRequest.usernameOrEmail(), e.getMessage());
+            log.warn("Login failed for {}: {}", loginRequest.usernameOrEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of(
                             "success", "false",
                             "message", e.getMessage()
                     ));
         } catch (IllegalStateException e){
-            log.warn("Account not verified for {}:{}", authRequest.usernameOrEmail(), e.getMessage());
+            log.warn("Account not verified for {}:{}", loginRequest.usernameOrEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of(
                             "success", "false",
                             "message", e.getMessage()
                     ));
         }catch (Exception e){
-            log.error("Unexpected error during login for {}:{}", authRequest.usernameOrEmail(), e.getMessage());
+            log.error("Unexpected error during login for {}:{}", loginRequest.usernameOrEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(
                             "success", "false",

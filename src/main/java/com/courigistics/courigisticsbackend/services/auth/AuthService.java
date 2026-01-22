@@ -1,9 +1,9 @@
 package com.courigistics.courigisticsbackend.services.auth;
 
-import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
-import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.requests.auth.LoginRequest;
+import com.courigistics.courigisticsbackend.dto.requests.customer.CustomerRegisterRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.ResetPasswordRequest;
-import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
+import com.courigistics.courigisticsbackend.dto.responses.auth.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
 import org.springframework.security.core.Authentication;
 
@@ -30,7 +30,7 @@ public interface AuthService {
      * @throws IllegalArgumentException if the registration data is invalid
      * @throws RuntimeException if there is an error during registration
      */
-    Account registerAccount(RegisterRequest request);
+    Account registerAccount(CustomerRegisterRequest request);
 
 
 
@@ -48,7 +48,7 @@ public interface AuthService {
      * @param request  the login credentials
      * @return AuthResponse containing access and refresh tokens
      */
-    AuthResponse login(AuthRequest request);
+    AuthResponse login(LoginRequest request);
 
     /**
      * Logs out a user by invalidating their refresh tokens

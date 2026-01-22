@@ -1,4 +1,4 @@
-package com.courigistics.courigisticsbackend.dto.responses;
+package com.courigistics.courigisticsbackend.dto.responses.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

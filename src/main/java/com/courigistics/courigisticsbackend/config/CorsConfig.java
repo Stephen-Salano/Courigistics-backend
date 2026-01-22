@@ -9,6 +9,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class CorsConfig {
@@ -22,14 +23,15 @@ public class CorsConfig {
 
         // Main API CORS configuration
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-                frontendUrl,
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:4200",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:5173"
-        ));
+//        configuration.setAllowedOriginPatterns(Arrays.asList(
+//                frontendUrl,
+//                "http://localhost:3000",
+//                "http://localhost:3001",
+//                "http://localhost:4200",
+//                "http://127.0.0.1:3000",
+//                "http://127.0.0.1:5173"
+//        ));
+        configuration.setAllowedOriginPatterns(List.of("*"));
 
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"

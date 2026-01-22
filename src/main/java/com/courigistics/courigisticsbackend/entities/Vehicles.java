@@ -3,13 +3,12 @@ package com.courigistics.courigisticsbackend.entities;
 import com.courigistics.courigisticsbackend.entities.enums.VehicleStatus;
 import com.courigistics.courigisticsbackend.entities.enums.VehicleType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Builder
 @Entity
 @Table(name = "vehicles", indexes = {
         @Index(name = "idx_depot_id", columnList = "depot_id"),
@@ -41,12 +40,17 @@ public class Vehicles {
     @Column(name = "model", nullable = false)
     private String model;
 
+    @Column(name = "year")
     private String manufactureYear;
 
+    @Column(name = "color")
     private String vehicleColor;
 
     @Column(name = "license_plate", unique = true)
     private String licencePlate;
+
+    @Column(name = "chassis_number", unique = true)
+    private String chassisNumber;
 
     @Column(name = "capacity_kg", nullable = false)
     private Double vehicleCapacityKg;
@@ -55,7 +59,9 @@ public class Vehicles {
     private Double vehicleCapacityM3;
 
     @Enumerated(EnumType.STRING)
-    private VehicleStatus status;
+    @Column(name = "status")
+    @Builder.Default
+    private VehicleStatus status = VehicleStatus.ACTIVE;
 
     @Column(name = "insurance_expiry_date")
     private String insuranceExpiryDate;
@@ -63,5 +69,12 @@ public class Vehicles {
 
     // TODO : Add vehicle insurance number
 
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 }

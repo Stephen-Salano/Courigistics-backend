@@ -51,11 +51,27 @@ jwt:
     # added Key validation
     min-key-length: 32 # Minimum 256 bits
 
-# Verification Token properties
+# Application-specific properties
 app:
+  # Verification Token properties
   verification-token:
     expiration-minutes: 15 # token expires after 15 minutes
     token-length: 32 # length of the random bytes used for token generation
+
+  # courier-specific configuration
+  courier:
+    approval:
+      auto-approve: false # set to true for testing without admin approval
+      require-vehicle-for-freelancer: true # freelancers must provide vehicles details
+    employee-id:
+      prefix: "COU" # Employee ID format: COU-YYYY-XXXX
+      year-format: "yyyy" # year format in employee ID
+      sequence-length: 4 # Number of digits in sequence (e.g., 0001)
+
+  # default depot assignment (can be overridden by admin)
+    default-depot:
+      code: "NBO-MAIN"# default depot code for new couriers
+
 
 # Actuator endpoints enabling
 management:

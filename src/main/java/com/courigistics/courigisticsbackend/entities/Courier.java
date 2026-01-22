@@ -3,13 +3,12 @@ package com.courigistics.courigisticsbackend.entities;
 import com.courigistics.courigisticsbackend.entities.enums.CourierStatus;
 import com.courigistics.courigisticsbackend.entities.enums.EmploymentType;
 import com.courigistics.courigisticsbackend.entities.enums.PaymentType;
+import com.courigistics.courigisticsbackend.entities.enums.VehicleType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -20,10 +19,12 @@ import java.util.UUID;
 @Table(name = "couriers", indexes = {
         @Index(name = "idx_courier_account", columnList = "account_id"),
         @Index(name = "idx_courier_depot", columnList = "depot_id"),
-        @Index(name = "idx_courier_status", columnList = "status")
+        @Index(name = "idx_courier_status", columnList = "status"),
+        @Index(name = "idx_courier_employee_id", columnList = "employee_id")
 })
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Courier {
     @Id
     @GeneratedValue
@@ -46,6 +47,7 @@ public class Courier {
     @Enumerated(EnumType.STRING)
     private CourierStatus status;
 
+    // TODO: If freelancer this is not enforced, employees it is enforced??
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "depot_id", nullable = false)
     private Depot depot;
@@ -58,6 +60,26 @@ public class Courier {
 
     @Column(name = "national_id", unique = true)
     private String nationalId;
+
+    @Column(name = "drivers_license_number", unique = true, nullable = false)
+    private String driversLicenseNumber;
+
+    @Column(name = "license_expiry_date", nullable = false)
+    private LocalDate licenseExpiryDate;
+
+    @Column(name = "pending_approval", nullable = false)
+    private Boolean pendingApproval = true;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by")
+    private Account approvedBy;
+
+//    @Column(name = "vehicle_type")
+//    @Enumerated(EnumType.STRING)
+//    private VehicleType vehicleType;
 
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
@@ -79,5 +101,22 @@ public class Courier {
 
     @Column(name = "fired_at")
     private LocalDateTime firedAt;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

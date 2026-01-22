@@ -1,11 +1,11 @@
 package com.courigistics.courigisticsbackend.services.auth;
 
 import com.courigistics.courigisticsbackend.config.security.JwtService;
-import com.courigistics.courigisticsbackend.dto.requests.AddressDTO;
-import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
-import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
+import com.courigistics.courigisticsbackend.dto.requests.common.AddressDTO;
+import com.courigistics.courigisticsbackend.dto.requests.auth.LoginRequest;
+import com.courigistics.courigisticsbackend.dto.requests.customer.CustomerRegisterRequest;
 import com.courigistics.courigisticsbackend.dto.requests.auth.ResetPasswordRequest;
-import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
+import com.courigistics.courigisticsbackend.dto.responses.auth.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.*;
 import com.courigistics.courigisticsbackend.entities.enums.AccountType;
 import com.courigistics.courigisticsbackend.entities.enums.TokenType;
@@ -51,7 +51,7 @@ public class CustomerAuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public Account registerAccount(RegisterRequest request) {
+    public Account registerAccount(CustomerRegisterRequest request) {
         try{
             log.debug("Validating registration data (username/email) for: {}", request.username());
             validateRegistrationData(request);
@@ -97,7 +97,7 @@ public class CustomerAuthServiceImpl implements AuthService {
         }
     }
 
-    private Customer createCustomer(RegisterRequest request, Account account) {
+    private Customer createCustomer(CustomerRegisterRequest request, Account account) {
         return Customer.builder()
                 .firstName(request.firstName())
                 .lastName(request.lastName())
@@ -106,7 +106,7 @@ public class CustomerAuthServiceImpl implements AuthService {
     }
 
 
-    private Account createCustomerAccount(RegisterRequest request) {
+    private Account createCustomerAccount(CustomerRegisterRequest request) {
          return Account.builder()
                 .username(request.username())
                 .email(request.email())
@@ -143,7 +143,7 @@ public class CustomerAuthServiceImpl implements AuthService {
     }
 
 
-    private void validateRegistrationData(RegisterRequest request) {
+    private void validateRegistrationData(CustomerRegisterRequest request) {
         // We check if the username already exists
         if(accountRepository.existsByUsername(request.username())){
             throw new IllegalArgumentException("Username already exists");
@@ -195,7 +195,7 @@ public class CustomerAuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse login(AuthRequest request) {
+    public AuthResponse login(LoginRequest request) {
         log.info("Login attempt for user: {}", request.usernameOrEmail());
 
         try{

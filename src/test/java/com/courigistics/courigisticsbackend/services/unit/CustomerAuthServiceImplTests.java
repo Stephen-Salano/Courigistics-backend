@@ -2,10 +2,10 @@ package com.courigistics.courigisticsbackend.services.unit;
 
 
 import com.courigistics.courigisticsbackend.config.security.JwtService;
-import com.courigistics.courigisticsbackend.dto.requests.AddressDTO;
-import com.courigistics.courigisticsbackend.dto.requests.auth.AuthRequest;
-import com.courigistics.courigisticsbackend.dto.requests.auth.RegisterRequest;
-import com.courigistics.courigisticsbackend.dto.responses.AuthResponse;
+import com.courigistics.courigisticsbackend.dto.requests.common.AddressDTO;
+import com.courigistics.courigisticsbackend.dto.requests.auth.LoginRequest;
+import com.courigistics.courigisticsbackend.dto.requests.customer.CustomerRegisterRequest;
+import com.courigistics.courigisticsbackend.dto.responses.auth.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.Account;
 import com.courigistics.courigisticsbackend.entities.Customer;
 import com.courigistics.courigisticsbackend.entities.RefreshToken;
@@ -70,7 +70,7 @@ public class CustomerAuthServiceImplTests {
      * Helper method to create an RegistrationRequest with a valid Adrress
      * @return the registerRequest for account creation with valid Address
      */
-    private RegisterRequest createValidRegisterRequestWithAddress(){
+    private CustomerRegisterRequest createValidRegisterRequestWithAddress(){
         AddressDTO validAddress = new AddressDTO(
                 "home",
                 "123 Avery Lane",
@@ -81,7 +81,7 @@ public class CustomerAuthServiceImplTests {
                 true
         );
 
-        return new RegisterRequest(
+        return new CustomerRegisterRequest(
                 "testuser@gmail.com",
                 "testusr",
                 "testUser254$",
@@ -93,8 +93,8 @@ public class CustomerAuthServiceImplTests {
         );
     }
 
-    private RegisterRequest createValidregisterRequestWithoutAddress(){
-        return new RegisterRequest(
+    private CustomerRegisterRequest createValidregisterRequestWithoutAddress(){
+        return new CustomerRegisterRequest(
                 "testuser@gmail.com",
                 "testusr",
                 "testUser254$",
@@ -106,8 +106,8 @@ public class CustomerAuthServiceImplTests {
         );
     }
 
-    private AuthRequest createValidAuthRequest(){
-        return new AuthRequest(
+    private LoginRequest createValidAuthRequest(){
+        return new LoginRequest(
                 "testusr",
                 "testUser254$"
         );
@@ -119,7 +119,7 @@ public class CustomerAuthServiceImplTests {
     @DisplayName("Happy path registration")
     public void registerCustomer_withValidAndUniqueData_shouldCreateAccountAccountSuccessfully(){
 
-        RegisterRequest request = createValidRegisterRequestWithAddress();
+        CustomerRegisterRequest request = createValidRegisterRequestWithAddress();
 
         // --- ARRANGE ---
         // 1. Mock repository checks for username/email
@@ -157,7 +157,7 @@ public class CustomerAuthServiceImplTests {
 
     @Test
     public void registerCustomer_withNoAddressInformation_shouldCreateAccountAccount(){
-        RegisterRequest request = createValidregisterRequestWithoutAddress();
+        CustomerRegisterRequest request = createValidregisterRequestWithoutAddress();
         String hashedPassword = "hashedPassword123";
         
         // Mocks
@@ -187,7 +187,7 @@ public class CustomerAuthServiceImplTests {
      */
     @Test
     public void registerAccount_withExistingUsername_shouldThrowException(){
-        RegisterRequest request = createValidRegisterRequestWithAddress();
+        CustomerRegisterRequest request = createValidRegisterRequestWithAddress();
 
         Mockito.when(accountRepository.existsByUsername(request.username())).thenReturn(true);
 
@@ -201,7 +201,7 @@ public class CustomerAuthServiceImplTests {
 
     @Test
     public void loginAccount_withExistingAccountDetails_shouldSucceed(){
-        AuthRequest loginRequest = createValidAuthRequest();
+        LoginRequest loginRequest = createValidAuthRequest();
 
         Customer sampleCustomer = new Customer().builder()
                 .firstName("john")

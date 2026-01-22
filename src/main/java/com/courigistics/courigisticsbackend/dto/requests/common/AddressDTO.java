@@ -1,4 +1,4 @@
-package com.courigistics.courigisticsbackend.dto.requests;
+package com.courigistics.courigisticsbackend.dto.requests.common;
 
 import jakarta.validation.constraints.NotBlank;
 

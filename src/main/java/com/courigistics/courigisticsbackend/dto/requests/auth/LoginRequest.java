@@ -16,7 +16,7 @@ import jakarta.validation.constraints.NotBlank;
  *
  * Bean validation ensures that both fields are provided and not empty.
  */
-public record AuthRequest(
+public record LoginRequest(
     @NotBlank(message = "Username or email cannot be blank")
     String usernameOrEmail,
 
