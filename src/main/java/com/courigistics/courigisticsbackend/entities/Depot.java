@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "depots", indexes = {
+@Table(name = "depot", indexes = {
         @Index(name = "idx_depot_code", columnList = "code"),
         @Index(name = "idx_depot_city", columnList = "city"),
         @Index(name = "idx_depot_parent", columnList = "parent_depot_id")

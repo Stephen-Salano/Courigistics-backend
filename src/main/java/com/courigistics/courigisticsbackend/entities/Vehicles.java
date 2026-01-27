@@ -11,6 +11,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "vehicles", indexes = {
+        @Index(name = "idx_vehicle_courier", columnList = "courier_id"),
         @Index(name = "idx_depot_id", columnList = "depot_id"),
         @Index(name = "idx_license_plate", columnList = "license_plate")
 })
