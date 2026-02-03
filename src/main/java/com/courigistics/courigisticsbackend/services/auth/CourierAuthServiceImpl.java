@@ -73,9 +73,12 @@ public class CourierAuthServiceImpl implements CourierAuthService {
             throw new BadRequestException("Vehicle license plate already registered");
         }
 
-        // 3: Find the default depot
-        Depot defaultDepot = depotRepository.findByCode(defaultDepotCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Default depot not found"));
+        // 3: Find the default depot (Only if NOT a freelancer)
+        Depot assignedDepot = null;
+        if (request.employmentType() != EmploymentType.FREELANCER) {
+            assignedDepot = depotRepository.findByCode(defaultDepotCode)
+                    .orElseThrow(() -> new ResourceNotFoundException("Default depot not found"));
+        }
 
         Account account = Account.builder()
                 .email(request.email())
@@ -99,7 +102,8 @@ public class CourierAuthServiceImpl implements CourierAuthService {
                 .nationalId(request.nationalId())
                 .employmentType(request.employmentType())
                 .driversLicenseNumber(request.driversLicenseNumber())
-                .depot(defaultDepot)
+                .licenseExpiryDate(request.licenseExpiryDate())
+                .depot(assignedDepot)
                 .status(CourierStatus.PENDING)
                 .pendingApproval(true)
                 .build();
@@ -110,7 +114,7 @@ public class CourierAuthServiceImpl implements CourierAuthService {
         if (request.employmentType() == EmploymentType.FREELANCER){
             Vehicles vehicles = Vehicles.builder()
                     .courier(courier)
-                    .depot(defaultDepot)
+                    .depot(assignedDepot) // This will be null for freelancers
                     .vehicleType(Objects.requireNonNull(request.vehicleDetails()).vehicleType())
                     .make(request.vehicleDetails().make())
                     .model(request.vehicleDetails().model())

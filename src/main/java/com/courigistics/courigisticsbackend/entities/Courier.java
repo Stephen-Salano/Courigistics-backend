@@ -3,7 +3,6 @@ package com.courigistics.courigisticsbackend.entities;
 import com.courigistics.courigisticsbackend.entities.enums.CourierStatus;
 import com.courigistics.courigisticsbackend.entities.enums.EmploymentType;
 import com.courigistics.courigisticsbackend.entities.enums.PaymentType;
-import com.courigistics.courigisticsbackend.entities.enums.VehicleType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,9 +46,8 @@ public class Courier {
     @Enumerated(EnumType.STRING)
     private CourierStatus status;
 
-    // TODO: If freelancer this is not enforced, employees it is enforced??
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "depot_id", nullable = false)
+    @JoinColumn(name = "depot_id", nullable = true)
     private Depot depot;
 
     @Column(name = "employee_id", unique = true)

@@ -10,6 +10,7 @@ spring:
     # Common configurations
   jpa:
     open-in-view: false
+    defer-datasource-initialization: true # Defer data.sql until after hibernate ddl
     properties:
       hibernate:
         jdbc:

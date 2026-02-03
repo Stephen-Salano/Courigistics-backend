@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -48,7 +49,8 @@ public class SecurityConfig {
             "/api/v1/auth/login/*",
             "/api/v1/auth/verify/*",
             "/api/v1/auth/forgot-password/*", // for password reset request
-            "/api/v1/auth/reset-password/*" // for password reset success
+            "/api/v1/auth/reset-password/*", // for password reset success
+            "/api/v1/auth/setup-account/*",
     };
 
     // Dev test endpoints
@@ -105,7 +107,7 @@ public class SecurityConfig {
 
         // our application uses stateless JWT, we turn off CSRF
         http
-                .csrf(csrf -> csrf.disable()).cors(cors -> {
+                .csrf(AbstractHttpConfigurer::disable).cors(cors -> {
                     if (isDevOrTest){
                         cors.configurationSource(request -> {
                             if (request.getRequestURI().startsWith("/h2-console")){

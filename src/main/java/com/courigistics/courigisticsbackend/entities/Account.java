@@ -29,7 +29,7 @@ public class Account implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "username", nullable = false, unique = true)
+    @Column(name = "username", unique = true)
     private String username;
 
     @Column(unique = true, nullable = false)
@@ -38,7 +38,7 @@ public class Account implements UserDetails {
     @Column(unique = true, nullable = false)
     private String phone;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
     @Enumerated(EnumType.STRING)

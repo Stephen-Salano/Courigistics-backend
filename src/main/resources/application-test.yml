@@ -7,6 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+    defer-datasource-initialization: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
@@ -25,8 +26,8 @@ spring:
   mail:
     host: ${TEST_MAIL_HOST:sandbox.smtp.mailtrap.io}
     port: ${TEST_MAIL_PORT:2525}
-    username: ${TEST_MAIL_USERNAME} # Your Mailtrap username from env vars
-    password: ${TEST_MAIL_PASSWORD} # Your Mailtrap password from env vars
+    username: ${TEST_MAIL_USERNAME} # Your Mail trap username from env vars
+    password: ${TEST_MAIL_PASSWORD} # Your Mail trap password from env vars
 
 
 # Test-specific Logging

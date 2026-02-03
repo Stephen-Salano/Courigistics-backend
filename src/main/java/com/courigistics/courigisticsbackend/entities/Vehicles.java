@@ -28,7 +28,7 @@ public class Vehicles {
     @OneToOne(fetch = FetchType.LAZY)
     private Courier courier;
 
-    @JoinColumn(name = "depot_id", nullable = false)
+    @JoinColumn(name = "depot_id", nullable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     private Depot depot;
 
@@ -41,7 +41,7 @@ public class Vehicles {
     @Column(name = "model", nullable = false)
     private String model;
 
-    @Column(name = "year")
+    @Column(name = "production_year")
     private String manufactureYear;
 
     @Column(name = "color")

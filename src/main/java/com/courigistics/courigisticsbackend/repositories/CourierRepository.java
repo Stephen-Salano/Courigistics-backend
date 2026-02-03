@@ -2,6 +2,8 @@ package com.courigistics.courigisticsbackend.repositories;
 
 import com.courigistics.courigisticsbackend.entities.Courier;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +18,8 @@ public interface CourierRepository extends JpaRepository<Courier, UUID> {
     Optional<Courier> findByAccount_Email(String email);
     boolean existsByDriversLicenseNumber(String licenseNumber);
     List<Courier> findByPendingApprovalTrue();
-    long countByCreatedAtYear(int year);
+
+    @Query("SELECT COUNT(c) FROM Courier c WHERE YEAR(c.createdAt) = :year")
+    long countByCreatedAtYear(@Param("year") int year);
 
 }

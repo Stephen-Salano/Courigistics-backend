@@ -14,6 +14,8 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Email configuration for asynchronous email sending using virtual threads
@@ -51,10 +53,8 @@ public class EmailConfig implements AsyncConfigurer{
     public Executor getAsyncExecutor() {
         log.info("Initializing virtual thread executor for email operations");
 
-        return (Executor) Thread.ofVirtual()
-                .name("email-vt-", 0) // Virtual thread naming: email-vt-0, email-vt-1, etc
-                .factory();
-
+        ThreadFactory factory = Thread.ofVirtual().name("email-vt-", 0).factory();
+        return Executors.newThreadPerTaskExecutor(factory);
     }
 
     /**
@@ -176,4 +176,3 @@ public class EmailConfig implements AsyncConfigurer{
         };
     }
 }
-
