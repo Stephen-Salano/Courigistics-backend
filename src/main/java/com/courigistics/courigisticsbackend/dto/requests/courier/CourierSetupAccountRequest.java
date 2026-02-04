@@ -9,8 +9,8 @@ import jakarta.validation.constraints.Size;
  * After admin approval, courier uses employeeId to set username and password
  */
 public record CourierSetupAccountRequest(
-        @NotBlank(message = "Employee ID is required")
-        String employeeId,
+        @NotBlank(message = "Setup token is required")
+        String token,
 
         @NotBlank(message = "Username is required")
         @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")

@@ -41,7 +41,7 @@ public interface EmailService {
     CompletableFuture<Void> sendCourierPendingApprovalEmail(String to, String firstName);
 
     /**
-     * Sends courier approval email with account setup link asynchronously
+     * Sends courier employee approval email with account setup link asynchronously
      *
      * Use case: After admin approval, send email with employee ID and setup link
      *
@@ -51,7 +51,17 @@ public interface EmailService {
      * @param setupToken Account setup token (7-day expiry)
      * @return CompletableFuture that completes when email is sent
      */
-    CompletableFuture<Void> sendCourierApprovalEmail(String to, String firstName, String employeeId, String setupToken);
+    CompletableFuture<Void> sendCourierEmployeeApprovalEmail(String to, String firstName, String employeeId, String setupToken);
+
+    /**
+     * Sends courier freelancer approval email with account setup link asynchronously
+     *
+     * @param to Courier email address
+     * @param firstName Courier first name
+     * @param setupToken Account setup token
+     * @return CompletableFuture that completes when email is sent
+     */
+    CompletableFuture<Void> sendCourierFreelancerApprovalEmail(String to, String firstName, String setupToken);
 
     /**
      * Sends account ready notification asynchronously

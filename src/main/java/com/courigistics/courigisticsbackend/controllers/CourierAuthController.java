@@ -81,7 +81,7 @@ public class CourierAuthController {
     public ResponseEntity<Map<String, Object>> setupAccount(
             @Valid @RequestBody CourierSetupAccountRequest request
             ){
-        log.info("Account setup attempt for employee ID: {}", request.employeeId());
+        log.info("Account setup attempt with token");
 
         try{
             courierAuthService.setupAccount(request);

@@ -62,7 +62,7 @@ app:
   # courier-specific configuration
   courier:
     approval:
-      auto-approve: false # set to true for testing without admin approval
+      auto-approve: true # set to true for testing without admin approval
       require-vehicle-for-freelancer: true # freelancers must provide vehicles details
     employee-id:
       prefix: "COU" # Employee ID format: COU-YYYY-XXXX

@@ -63,7 +63,6 @@ public class SecurityConfig {
             "/actuator/**"
     };
 
-
     @Bean // So spring can manage this as a bean
     /*
      * returns Authentication provider, which is a code Spring security interface responsible for handling a specific type of authentication

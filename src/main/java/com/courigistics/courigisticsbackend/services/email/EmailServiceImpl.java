@@ -106,9 +106,9 @@ public class EmailServiceImpl implements EmailService{
 
     @Async("emailTaskExecutor")
     @Override
-    public CompletableFuture<Void> sendCourierApprovalEmail(String to, String firstName, String employeeId, String setupToken) {
+    public CompletableFuture<Void> sendCourierEmployeeApprovalEmail(String to, String firstName, String employeeId, String setupToken) {
             String threadName = Thread.currentThread().getName();
-            log.info("[{}] Sending courier approval email to: {} with employeeId: {}", threadName, to, employeeId);
+            log.info("[{}] Sending courier employee approval email to: {} with employeeId: {}", threadName, to, employeeId);
 
             try {
                 // Build setup link
@@ -119,14 +119,35 @@ public class EmailServiceImpl implements EmailService{
                 context.setVariable("employeeId", employeeId);
                 context.setVariable("setupLink", setupLink);
 
-                String htmlContent = templateEngine.process("courier-approved", context);
+                String htmlContent = templateEngine.process("courier-employee-approved", context);
 
                 sendHtmlEmail(to, "🎉 Application Approved - Set Up Your Account", htmlContent);
 
-                log.info("[{}] Courier approval email sent successfully to: {}", threadName, to);
+                log.info("[{}] Courier employee approval email sent successfully to: {}", threadName, to);
                 return CompletableFuture.completedFuture(null);
             } catch (Exception e) {
-                log.error("[{}] Failed to send courier approval email to: {}", threadName, to, e);
+                log.error("[{}] Failed to send courier employee approval email to: {}", threadName, to, e);
+                throw new RuntimeException("Failed to send approval email", e);
+            }
+    }
+
+    @Async("emailTaskExecutor")
+    @Override
+    public CompletableFuture<Void> sendCourierFreelancerApprovalEmail(String to, String firstName, String setupToken) {
+            String threadName = Thread.currentThread().getName();
+            log.info("[{}] Sending courier freelancer approval email to: {}", threadName, to);
+
+            try {
+                String setupLink = frontendUrl + "/auth/setup-account/courier?token=" + setupToken;
+                Context context = new Context();
+                context.setVariable("firstName", firstName);
+                context.setVariable("setupLink", setupLink);
+
+                String htmlContent = templateEngine.process("courier-freelancer-approved", context);
+                sendHtmlEmail(to, "🎉 Application Approved - Set Up Your Account", htmlContent);
+                return CompletableFuture.completedFuture(null);
+            } catch (Exception e) {
+                log.error("[{}] Failed to send courier freelancer approval email to: {}", threadName, to, e);
                 throw new RuntimeException("Failed to send approval email", e);
             }
     }

@@ -131,10 +131,13 @@ public class CourierAuthServiceImpl implements CourierAuthService {
         }
 
         // 7: Generate Verification Token
-        VerificationToken token = verificationTokenService.createToken(account, TokenType.EMAIL_VERIFICATION);
-        
+        VerificationToken verificationToken = verificationTokenService.createToken(account, TokenType.EMAIL_VERIFICATION);
+        log.debug("Created verification token for courier: token={} expiresAt={}",
+                verificationToken.getToken(), verificationToken.getExpiryDate()
+        );
+
         emailService.sendCourierVerificationEmail(
-                account.getEmail(), token.getToken(), courier.getFirstName()
+                account.getEmail(), verificationToken.getToken(), courier.getFirstName()
         );
 
         log.info("Courier registration complete for: {}", request.email());
@@ -147,7 +150,7 @@ public class CourierAuthServiceImpl implements CourierAuthService {
     public boolean verifyEmail(String token) {
         log.info("Verifying courier email with token");
 
-        // 1: Validate tken
+        // 1: Validate token
         VerificationToken verificationToken = verificationTokenService
                 .validateToken(token, TokenType.EMAIL_VERIFICATION)
                 .orElseThrow(() -> new BadRequestException("Invalid or expired verification token"));
@@ -166,16 +169,16 @@ public class CourierAuthServiceImpl implements CourierAuthService {
         courier.setStatus(CourierStatus.PENDING); // Still pending admin approval
         courierRepository.save(courier);
 
-        // 5: Send "pending approval email"
-        emailService.sendCourierPendingApprovalEmail(account.getEmail(), courier.getFirstName());
-
         log.info("Email verified for courier: {}", account.getEmail());
 
         // If auto-approve is enabled (for testing), approve immediately
         if (autoApprove){
-            log.info("Auto-approve enabled - approving courier immediately");
-            // create a mock admin account for testing
-            accountRepository.findByEmail("admin@courigistics.com").ifPresent(mockAdmin -> approveCourier(courier.getId(), mockAdmin.getId()));
+            log.info("Auto-approve enabled. Skipping 'Pending Approval' email to avoid rate-limiting and speed up flow.");
+            approveCourier(courier.getId(), null);
+        } else {
+            // 5: Send "pending approval email" only if NOT auto-approving
+            // In production, this is the only email sent at this stage.
+            emailService.sendCourierPendingApprovalEmail(account.getEmail(), courier.getFirstName());
         }
         return true;
     }
@@ -194,73 +197,93 @@ public class CourierAuthServiceImpl implements CourierAuthService {
             throw new BadRequestException("Courier email not yet verified");
         }
 
-        // 3. Generate employee ID
-        String employeeId = employeeIdGenerator.generateEmployeeId();
+        // 3. Handle Admin (can be null for auto-approve)
+        Account admin = null;
+        if (adminId != null) {
+            admin = accountRepository.findById(adminId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
+        }
 
         // 4: Update courier
         courier.setPendingApproval(false);
         courier.setApprovedAt(LocalDateTime.now());
-        courier.setEmployeeId(employeeId);
         courier.setStatus(CourierStatus.ACTIVE);
-
-        // Set admin who approved
-        Account admin = accountRepository.findById(adminId)
-                .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
-        courierRepository.save(courier);
+        courier.setApprovedBy(admin);
 
         // 5: Generate account setup token
         VerificationToken setUpToken = verificationTokenService.createToken(
                 courier.getAccount(), TokenType.ACCOUNT_SETUP
         );
+        log.debug("Created setup token for courier: token={} expiresAt={}",
+                setUpToken.getToken(), setUpToken.getExpiryDate()
+        );
 
-        // 6: Send approval email with setup link
-        emailService.sendCourierApprovalEmail(
+        // 6: Handle specific logic based on employment type
+        if (courier.getEmploymentType() == EmploymentType.EMPLOYEE) {
+            String employeeId = employeeIdGenerator.generateEmployeeId();
+            courier.setEmployeeId(employeeId);
+            courierRepository.save(courier);
+
+            emailService.sendCourierEmployeeApprovalEmail(
                 courier.getAccount().getEmail(),
                 courier.getFirstName(),
                 employeeId,
                 setUpToken.getToken()
-        );
+            );
+        } else {
+            courierRepository.save(courier);
 
-        log.info("Courier approved: {} | Employee ID: {}", courier.getAccount().getEmail(), employeeId);
+            emailService.sendCourierFreelancerApprovalEmail(
+                    courier.getAccount().getEmail(),
+                    courier.getFirstName(),
+                    setUpToken.getToken()
+            );
+        }
+
+        log.info("Courier approved: {}", courier.getAccount().getEmail());
     }
 
     @Override
     @Transactional
     public void setupAccount(CourierSetupAccountRequest request) {
-        log.info("Setting up account for employee ID: {}", request.employeeId());
+        log.info("Setting up account with token");
 
         // 1: Validate passwords match
         ValidationUtils.validatePasswordsMatch(request.password(), request.confirmPassword());
 
-        // 2: Find courier by employeeId
-        Courier courier = courierRepository.findByEmployeeId(request.employeeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Courier not found with this employee ID"));
+        // 2: Validate token
+        VerificationToken token = verificationTokenService.validateToken(request.token(), TokenType.ACCOUNT_SETUP)
+                .orElseThrow(() -> new BadRequestException("Invalid or expired setup token"));
 
-        // 3: Validate courier is approved
+        Account account = token.getAccount();
+
+        // 3: Find courier
+        Courier courier = courierRepository.findByAccount_Email(account.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("Courier profile not found"));
+
+        // 4: Validate courier is approved
         CourierValidationUtils.validateCourierApproved(courier.getPendingApproval());
 
-        // 4: Check username is approved
+        // 5: Check username is available
         if (accountRepository.existsByUsername(request.username())){
             throw new BadRequestException("Username already taken");
         }
 
-        //5: Check account not already setup
-        Account account = courier.getAccount();
+        // 6: Check account not already setup
         if (account.getUsername() != null){
             throw new BadRequestException("Account already setup");
         }
 
-        // 6: Update account with username and password
+        // 7: Update account with username and password
         account.setUsername(request.username());
         account.setPassword(passwordEncoder.encode(request.password()));
         account.setEnabled(true);
         accountRepository.save(account);
 
-        // 7: Delete setup token
-        verificationTokenService.findByToken(request.employeeId())
-                .ifPresent(verificationTokenService::deleteToken);
+        // 8: Delete setup token
+        verificationTokenService.deleteToken(token);
 
-        // 8: Send account ready email
+        // 9: Send account ready email
         emailService.sendCourierAccountReadyEmail(
                 account.getEmail(),
                 courier.getFirstName(),

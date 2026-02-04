@@ -51,21 +51,6 @@
         .button:hover {
             background-color: #218838;
         }
-        .credential-box {
-            background: #f8f9fa;
-            border: 2px solid #28a745;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .employee-id {
-            font-size: 24px;
-            font-weight: bold;
-            color: #28a745;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-        }
         .warning {
             background: #fff3cd;
             border-left: 4px solid #ffc107;
@@ -97,12 +82,6 @@
 
         <p style="text-align: center; font-size: 18px;">Your application has been <strong>approved</strong>!</p>
 
-        <div class="credential-box">
-            <p style="margin: 0; color: #666;">Your Employee ID</p>
-            <div class="employee-id" th:text="${employeeId}">COU-2025-0001</div>
-            <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">Keep this ID safe - you'll need it to set up your account</p>
-        </div>
-
         <p><strong>Next Steps:</strong></p>
         <ol>
             <li>Click the button below to set up your account</li>
@@ -118,13 +97,6 @@
         <div class="warning">
             <strong>⚠️ Important:</strong> This setup link will expire in 7 days. Please complete your account setup as soon as possible.
         </div>
-
-        <p><strong>What you'll need:</strong></p>
-        <ul>
-            <li>Your Employee ID (shown above)</li>
-            <li>A unique username of your choice</li>
-            <li>A strong password (at least 8 characters)</li>
-        </ul>
 
         <p>Welcome to the CouriGistics team! We're excited to have you on board.</p>
     </div>
