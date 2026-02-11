@@ -5,14 +5,14 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO for courier account setup (Step 5)
- * After admin approval, courier uses employeeId to set username and password
+ * DTO for courier account setup.
+ * - For Employees, 'token' is the Employee ID and 'username' is ignored.
+ * - For Freelancers, 'token' is the setup token from the email and 'username' is required.
  */
 public record CourierSetupAccountRequest(
-        @NotBlank(message = "Setup token is required")
+        @NotBlank(message = "Identifier (Employee ID or Token) is required")
         String token,
 
-        @NotBlank(message = "Username is required")
         @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
         @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores")
         String username,

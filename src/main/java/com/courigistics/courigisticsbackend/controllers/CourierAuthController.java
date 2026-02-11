@@ -6,13 +6,18 @@ import com.courigistics.courigisticsbackend.dto.requests.courier.CourierSetupAcc
 import com.courigistics.courigisticsbackend.dto.responses.auth.AuthResponse;
 import com.courigistics.courigisticsbackend.dto.responses.courier.CourierRegistrationResponse;
 import com.courigistics.courigisticsbackend.services.auth.CourierAuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -22,6 +27,9 @@ import java.util.Map;
 public class CourierAuthController {
 
     private final CourierAuthService courierAuthService;
+
+    @Value("${spring.application.frontend-url}")
+    private String frontendUrl;
 
     @PostMapping("/register/courier")
     public ResponseEntity<Map<String, Object>> registerCourier(
@@ -49,32 +57,28 @@ public class CourierAuthController {
     }
 
     @GetMapping("/verify/courier")
-    public ResponseEntity<Map<String, Object>> verifyCourierEmail(
-            @RequestParam("token") String token
-    ){
+    public void verifyCourierEmail(
+            @RequestParam("token") String token, HttpServletResponse response
+    ) throws IOException {
         try{
             boolean verified = courierAuthService.verifyEmail(token);
-
             if (verified){
-                return ResponseEntity.ok(Map.of(
-                        "success", true,
-                        "message", "Email verified! Your application is pending admin approval"
-                ));
-            }else{
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of(
-                                "success", false,
-                                "message", "Invalid or expired verification token"
-                        ));
+                response.sendRedirect(frontendUrl + "/verify/courier?success=true");
+            } else {
+                String message = URLEncoder.encode("Invalid or expired token.", StandardCharsets.UTF_8);
+                response.sendRedirect(frontendUrl + "/verify/courier?success=false&message=" + message);
             }
         }catch (Exception e) {
             log.error("Verification failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of(
-                            "success", false,
-                            "message", e.getMessage()
-                    ));
+            String message = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
+            response.sendRedirect(frontendUrl + "/verify/courier?success=false&message=" + message);
         }
+    }
+
+    @GetMapping("/setup-account/courier")
+    public void handleSetupAccountLink(@RequestParam("token") String token, HttpServletResponse response) throws IOException {
+        // This endpoint simply redirects the user to the frontend page, passing the token along.
+        response.sendRedirect(frontendUrl + "/account-setup?token=" + token);
     }
 
     @PostMapping("/setup-account/courier")

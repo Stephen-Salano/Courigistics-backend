@@ -34,8 +34,11 @@ public class EmailServiceImpl implements EmailService{
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    @Value("${spring.application.frontend-url}")
-    private String frontendUrl;
+    @Value("${server.port}")
+    private String serverPort;
+
+    @Value("${app.backend-base-url}")
+    private String backendBaseUrl;
 
     /**
      * Sends courier verification email asynchronously
@@ -53,8 +56,9 @@ public class EmailServiceImpl implements EmailService{
             log.info("[{}] Sending courier verification email to: {}", threadName, to);
 
             try {
-                // Build verification link
-                String verificationLink = frontendUrl + "/courier/verify?token=" + token;
+                // Build verification link to point to the BACKEND
+                String verificationLink = String.format("%s:%s/api/v1/auth/verify/courier?token=%s", backendBaseUrl, serverPort, token);
+
 
                 // Create Thymeleaf context with variables
                 Context context = new Context();
@@ -111,8 +115,8 @@ public class EmailServiceImpl implements EmailService{
             log.info("[{}] Sending courier employee approval email to: {} with employeeId: {}", threadName, to, employeeId);
 
             try {
-                // Build setup link
-                String setupLink = frontendUrl + "/auth/setup-account/courier?token=" + setupToken;
+                // Build setup link to point to the BACKEND
+                String setupLink = String.format("%s:%s/api/v1/auth/setup-account/courier?token=%s", backendBaseUrl, serverPort, setupToken);
 
                 Context context = new Context();
                 context.setVariable("firstName", firstName);
@@ -138,7 +142,8 @@ public class EmailServiceImpl implements EmailService{
             log.info("[{}] Sending courier freelancer approval email to: {}", threadName, to);
 
             try {
-                String setupLink = frontendUrl + "/auth/setup-account/courier?token=" + setupToken;
+                // Build setup link to point to the BACKEND
+                String setupLink = String.format("%s:%s/api/v1/auth/setup-account/courier?token=%s", backendBaseUrl, serverPort, setupToken);
                 Context context = new Context();
                 context.setVariable("firstName", firstName);
                 context.setVariable("setupLink", setupLink);
@@ -198,7 +203,8 @@ public class EmailServiceImpl implements EmailService{
             log.info("[{}] Sending customer verification email to: {}", threadName, to);
 
             try{
-                String verificationLink = frontendUrl + "/auth/verify/customer?token=" + token;
+                // Build verification link to point to the BACKEND
+                String verificationLink = String.format("%s:%s/api/v1/auth/verify/customer?token=%s", backendBaseUrl, serverPort, token);
 
                 Context context = new Context();
                 context.setVariable("firstName", firstName);
@@ -230,7 +236,8 @@ public class EmailServiceImpl implements EmailService{
             log.info("[{}] sending password reset email to: {}", threadName, to);
 
             try{
-                String resetLink = frontendUrl + "auth/reset-password?token=" + token;
+                // Build reset link to point to the BACKEND
+                String resetLink = String.format("%s:%s/api/v1/auth/reset-password?token=%s", backendBaseUrl, serverPort, token);
 
                 Context context = new Context();
                 context.setVariable("firstName", firstName);

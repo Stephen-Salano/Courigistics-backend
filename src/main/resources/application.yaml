@@ -1,7 +1,7 @@
 spring:
   application:
     name: Courigistics
-    frontend-url: ${FRONTEND_URL:http://localhost:5173}
+    frontend-url: ${FRONTEND_URL:http://localhost:8081}
   datasource:
     hikari:
       maximum-pool-size: 20
@@ -54,6 +54,7 @@ jwt:
 
 # Application-specific properties
 app:
+  backend-base-url: ${BACKEND_BASE_URL:http://localhost}
   # Verification Token properties
   verification-token:
     expiration-minutes: 15 # token expires after 15 minutes

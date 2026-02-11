@@ -1,28 +1,26 @@
-#spring:
-#  datasource:
-#    url: ${DB_DEV_URL}
-#    username: ${DB_DEV_USERNAME}
-#    password: ${DB_DEV_PASSWORD}
-#    driver-class-name: org.postgresql.Driver
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
-#  mail:
-#    host: ${TEST_MAIL_HOST}
-#    port: ${TEST_MAIL_PORT}
-#    username: ${TEST_MAIL_USERNAME}
-#    password: ${TEST_MAIL_PASSWORD}
-#
-##Dev specific Logging
-#logging:
-#  level:
-#    com.stephensalano.fileflow_api: DEBUG
-#    org.springframework.security: DEBUG
-#    org.hibernate.SQL: DEBUG
-#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-#    org.hibernate.Transaction: TRACE
-#    org.springframework.orm.jpa.JpaTransactionManager: TRACE
+spring:
+  datasource:
+    url: ${DB_DEV_URL:jdbc:postgresql://localhost:5432/courigistics_dev}
+    username: ${DB_DEV_USERNAME:your_db_user}
+    password: ${DB_DEV_PASSWORD:your_db_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  mail:
+    host: ${TEST_MAIL_HOST:smtp.gmail.com}
+    port: ${TEST_MAIL_PORT:587}
+    username: ${TEST_MAIL_USERNAME:your-email@example.com}
+    password: ${TEST_MAIL_PASSWORD:your-password}
+
+#Dev specific Logging
+logging:
+  level:
+    com.courigistics.courigisticsbackend: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

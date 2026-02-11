@@ -1,6 +1,7 @@
 package com.courigistics.courigisticsbackend.dto.requests.common;
 
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.lang.Nullable;
 
 public record AddressDTO(
         String label,
@@ -9,7 +10,7 @@ public record AddressDTO(
         String addressLine2,
         @NotBlank(message = "City or town must be entered")
         String city,
-        @NotBlank(message = "postal code must be entered")
+        @Nullable
         String postalCode,
         @NotBlank(message = "Country must be entered")
         String country,
