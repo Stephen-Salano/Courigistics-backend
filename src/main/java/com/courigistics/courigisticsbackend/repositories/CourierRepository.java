@@ -17,6 +17,7 @@ public interface CourierRepository extends JpaRepository<Courier, UUID> {
     Optional<Courier> findByEmployeeId(String employeeId);
     Optional<Courier> findByAccount_Email(String email);
     boolean existsByDriversLicenseNumber(String licenseNumber);
+    boolean existsByNationalId(String nationalId);
     List<Courier> findByPendingApprovalTrue();
 
     @Query("SELECT COUNT(c) FROM Courier c WHERE YEAR(c.createdAt) = :year")

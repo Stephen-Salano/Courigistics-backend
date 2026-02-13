@@ -9,6 +9,7 @@ import com.courigistics.courigisticsbackend.dto.responses.auth.AuthResponse;
 import com.courigistics.courigisticsbackend.entities.*;
 import com.courigistics.courigisticsbackend.entities.enums.AccountType;
 import com.courigistics.courigisticsbackend.entities.enums.TokenType;
+import com.courigistics.courigisticsbackend.events.OnRegistrationCompleteEvent;
 import com.courigistics.courigisticsbackend.repositories.AccountRepository;
 import com.courigistics.courigisticsbackend.repositories.CustomerRepository;
 import com.courigistics.courigisticsbackend.repositories.RefreshTokenRepository;
@@ -88,7 +89,9 @@ public class CustomerAuthServiceImpl implements AuthService {
                     verificationToken.getExpiryDate()
             );
 
-            // TODO: Add event publisher that will handle sending the email for verification
+            // Publish registration event
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(savedAccount, verificationToken.getToken()));
+
             log.info("Registration completed for user: {}", savedAccount.getUsername());
             return savedAccount;
         } catch (Exception e){
@@ -107,7 +110,7 @@ public class CustomerAuthServiceImpl implements AuthService {
 
 
     private Account createCustomerAccount(CustomerRegisterRequest request) {
-         return Account.builder()
+        return Account.builder()
                 .username(request.username())
                 .email(request.email())
                 .phone(request.phoneNumber()) // Added missing phone number
@@ -231,14 +234,14 @@ public class CustomerAuthServiceImpl implements AuthService {
              *      as the token string
              * - Then we save the token
              */
-           createAndSaveRefreshToken(account, refreshToken);
+            createAndSaveRefreshToken(account, refreshToken);
 
             // TODO: Add device fingerprint for unknown login alerts to users
             log.info("Login successful for user:{}", account.getUsername());
             return AuthResponse.of(
                     accessToken, refreshToken,jwtService.getAccessTokenExpiration() / 1000, // converted into seconds
                     account.getUsername(), account.getEmail(), account.getAccountType().name()
-                    );
+            );
         } catch (AuthenticationException e){
             log.warn("Login failed for user: {} - {}", request.usernameOrEmail(), e.getMessage());
             throw new IllegalArgumentException("Invalid username / email or password");
@@ -330,7 +333,7 @@ public class CustomerAuthServiceImpl implements AuthService {
     public void resetPassword(ResetPasswordRequest request) {
         log.info("Attempting to reset password with a token");
 
-         // Serverside validation check for matching passwords
+        // Serverside validation check for matching passwords
         ValidationUtils.validatePasswordsMatch(request.newPassword(), request.confirmPassword());
 
         // Validate the token and ensure it's a PASSWORD_RESET token
