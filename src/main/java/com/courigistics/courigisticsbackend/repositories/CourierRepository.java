@@ -16,6 +16,7 @@ public interface CourierRepository extends JpaRepository<Courier, UUID> {
 
     Optional<Courier> findByEmployeeId(String employeeId);
     Optional<Courier> findByAccount_Email(String email);
+    Optional<Courier> findByAccount_Id(UUID accountId);
     boolean existsByDriversLicenseNumber(String licenseNumber);
     boolean existsByNationalId(String nationalId);
     List<Courier> findByPendingApprovalTrue();
