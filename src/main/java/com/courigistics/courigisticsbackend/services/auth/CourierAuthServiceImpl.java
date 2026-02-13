@@ -9,12 +9,14 @@ import com.courigistics.courigisticsbackend.dto.responses.courier.CourierRegistr
 import com.courigistics.courigisticsbackend.entities.*;
 import com.courigistics.courigisticsbackend.entities.enums.*;
 import com.courigistics.courigisticsbackend.exceptions.BadRequestException;
+import com.courigistics.courigisticsbackend.exceptions.DuplicateResourceException;
 import com.courigistics.courigisticsbackend.exceptions.ResourceNotFoundException;
 import com.courigistics.courigisticsbackend.repositories.*;
 import com.courigistics.courigisticsbackend.services.email.EmailService;
 import com.courigistics.courigisticsbackend.services.verification_token.VerificationTokenService;
 import com.courigistics.courigisticsbackend.utils.CourierValidationUtils;
 import com.courigistics.courigisticsbackend.utils.EmployeeIdGenerator;
+import com.courigistics.courigisticsbackend.utils.PhoneNumberUtils;
 import com.courigistics.courigisticsbackend.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,20 +59,29 @@ public class CourierAuthServiceImpl implements CourierAuthService {
     public CourierRegistrationResponse registerCourier(CourierRegisterRequest request) {
         log.info("Starting courier registration for email: {}", request.email());
 
+        // 1. Normalize phone number
+        String normalizedPhone = PhoneNumberUtils.normalizePhoneNumber(request.phone());
+
         // we validate the request
         CourierValidationUtils.validateVehicleRequired(request.employmentType(), request.vehicleDetails());
         CourierValidationUtils.validateLicenseNotExpired(request.licenseExpiryDate());
 
         // 2: Check duplicates
         if (accountRepository.existsByEmail(request.email())){
-            throw new BadRequestException("Email already registered");
+            throw new DuplicateResourceException("Email already registered");
+        }
+        if (accountRepository.existsByPhone(normalizedPhone)){
+            throw new DuplicateResourceException("Phone number already registered");
         }
 
         if (courierRepository.existsByDriversLicenseNumber(request.driversLicenseNumber())){
-            throw new BadRequestException("Driver's license number already registered");
+            throw new DuplicateResourceException("Driver's license number already registered");
+        }
+        if (courierRepository.existsByNationalId(request.nationalId())){
+            throw new DuplicateResourceException("National ID already registered");
         }
         if (request.vehicleDetails() != null && vehicleRepository.existsByLicencePlate(request.vehicleDetails().licensePlate())){
-            throw new BadRequestException("Vehicle license plate already registered");
+            throw new DuplicateResourceException("Vehicle license plate already registered");
         }
 
         // 3: Find the default depot (Only if NOT a freelancer)
@@ -82,7 +93,7 @@ public class CourierAuthServiceImpl implements CourierAuthService {
 
         Account account = Account.builder()
                 .email(request.email())
-                .phone(request.phone())
+                .phone(normalizedPhone) // Use normalized phone
                 .username(null) // will be set during account setup
                 .password(null) // Set during account setup
                 .accountType(AccountType.COURIER)

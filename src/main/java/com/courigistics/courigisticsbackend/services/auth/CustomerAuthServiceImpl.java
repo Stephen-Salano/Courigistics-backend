@@ -10,10 +10,12 @@ import com.courigistics.courigisticsbackend.entities.*;
 import com.courigistics.courigisticsbackend.entities.enums.AccountType;
 import com.courigistics.courigisticsbackend.entities.enums.TokenType;
 import com.courigistics.courigisticsbackend.events.OnRegistrationCompleteEvent;
+import com.courigistics.courigisticsbackend.exceptions.DuplicateResourceException;
 import com.courigistics.courigisticsbackend.repositories.AccountRepository;
 import com.courigistics.courigisticsbackend.repositories.CustomerRepository;
 import com.courigistics.courigisticsbackend.repositories.RefreshTokenRepository;
 import com.courigistics.courigisticsbackend.services.verification_token.VerificationTokenService;
+import com.courigistics.courigisticsbackend.utils.PhoneNumberUtils;
 import com.courigistics.courigisticsbackend.utils.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotBlank;
@@ -55,14 +57,18 @@ public class CustomerAuthServiceImpl implements AuthService {
     public Account registerAccount(CustomerRegisterRequest request) {
         try{
             log.debug("Validating registration data (username/email) for: {}", request.username());
-            validateRegistrationData(request);
-            log.debug("Validation passed: username/email are free.");
+            
+            // 1. Normalize phone number
+            String normalizedPhone = PhoneNumberUtils.normalizePhoneNumber(request.phoneNumber());
+            
+            validateRegistrationData(request, normalizedPhone);
+            log.debug("Validation passed: username/email/phone are free.");
 
-            // 1. Create all related entities in memory first
-            Account account = createCustomerAccount(request);
+            // 2. Create all related entities in memory first
+            Account account = createCustomerAccount(request, normalizedPhone);
             Customer customer = createCustomer(request, account);
 
-            // 2. Establish bidirectional relationships
+            // 3. Establish bidirectional relationships
             account.setCustomer(customer);
 
             // Conditionally create and link address:
@@ -74,7 +80,7 @@ public class CustomerAuthServiceImpl implements AuthService {
                 log.debug("No AddressDTO provided, skipping address creation");
             }
 
-            // 3. Save the parent entity. Cascade will handle the rest.
+            // 4. Save the parent entity. Cascade will handle the rest.
             log.debug("Attempting to save Account and cascade to Customer and Address.");
             Account savedAccount = accountRepository.save(account);
             log.debug("Saved Account with ID: {}", savedAccount.getId());
@@ -109,11 +115,11 @@ public class CustomerAuthServiceImpl implements AuthService {
     }
 
 
-    private Account createCustomerAccount(CustomerRegisterRequest request) {
+    private Account createCustomerAccount(CustomerRegisterRequest request, String normalizedPhone) {
         return Account.builder()
                 .username(request.username())
                 .email(request.email())
-                .phone(request.phoneNumber()) // Added missing phone number
+                .phone(normalizedPhone) // Use normalized phone
                 .password(passwordEncoder.encode(request.password()))
                 .accountType(AccountType.CUSTOMER)
                 .enabled(false) // Should be false until email is verified
@@ -146,15 +152,20 @@ public class CustomerAuthServiceImpl implements AuthService {
     }
 
 
-    private void validateRegistrationData(CustomerRegisterRequest request) {
+    private void validateRegistrationData(CustomerRegisterRequest request, String normalizedPhone) {
         // We check if the username already exists
         if(accountRepository.existsByUsername(request.username())){
-            throw new IllegalArgumentException("Username already exists");
+            throw new DuplicateResourceException("Username already exists");
         }
 
         // check if email already exists
         if (accountRepository.existsByEmail(request.email())){
-            throw new IllegalArgumentException("Email already in use");
+            throw new DuplicateResourceException("Email already in use");
+        }
+        
+        // check if phone already exists
+        if (accountRepository.existsByPhone(normalizedPhone)){
+            throw new DuplicateResourceException("Phone number already in use");
         }
     }
 
