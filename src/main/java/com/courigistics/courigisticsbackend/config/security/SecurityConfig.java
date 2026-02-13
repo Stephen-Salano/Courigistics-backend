@@ -119,10 +119,10 @@ public class SecurityConfig {
                     }
                 }).authorizeHttpRequests(auth -> auth
                         .requestMatchers(permList.toArray(new String[0])).permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasRole(AccountType.ADMIN.toString())
-                        .requestMatchers("/api/v1/customer/**").hasRole(AccountType.CUSTOMER.toString())
-                        .requestMatchers("/api/v1/courier/**").hasRole(AccountType.COURIER.toString())
-                        .requestMatchers("/api/v1/depo-admin/**").hasRole(AccountType.DEPOT_ADMIN.toString())
+                        .requestMatchers("/api/v1/admin/**").hasAuthority(AccountType.ADMIN.toString())
+                        .requestMatchers("/api/v1/customer/**").hasAuthority(AccountType.CUSTOMER.toString())
+                        .requestMatchers("/api/v1/courier/**").hasAuthority(AccountType.COURIER.toString())
+                        .requestMatchers("/api/v1/depo-admin/**").hasAuthority(AccountType.DEPOT_ADMIN.toString())
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
