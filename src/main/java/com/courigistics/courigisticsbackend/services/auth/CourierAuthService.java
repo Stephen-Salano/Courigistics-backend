@@ -5,6 +5,7 @@ import com.courigistics.courigisticsbackend.dto.requests.courier.CourierRegister
 import com.courigistics.courigisticsbackend.dto.requests.courier.CourierSetupAccountRequest;
 import com.courigistics.courigisticsbackend.dto.responses.auth.AuthResponse;
 import com.courigistics.courigisticsbackend.dto.responses.courier.CourierRegistrationResponse;
+import org.springframework.security.core.Authentication;
 
 import java.util.UUID;
 
@@ -40,4 +41,10 @@ public interface CourierAuthService {
      * Reuses existing login logic
      */
     AuthResponse login(LoginRequest request);
+
+    /**
+     * Logs out a courier by invalidating their refresh tokens
+     * @param authentication the current user's authentication
+     */
+    void logout(Authentication authentication);
 }

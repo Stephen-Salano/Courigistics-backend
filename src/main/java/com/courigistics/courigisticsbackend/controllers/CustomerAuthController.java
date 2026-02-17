@@ -34,8 +34,7 @@ public class CustomerAuthController {
 
     // DI for the Auth service class
     @Qualifier("customerAuthService")
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     @Value("${spring.application.frontend-url}")
     private String frontendUrl;
@@ -166,7 +165,7 @@ public class CustomerAuthController {
 
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/logout/customer")
     public ResponseEntity<Map<String, Object>> logout(Authentication authentication){
         try{
             authService.logout(authentication);

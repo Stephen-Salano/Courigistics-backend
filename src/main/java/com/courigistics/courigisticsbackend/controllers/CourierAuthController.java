@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -123,6 +124,24 @@ public class CourierAuthController {
                     .body(Map.of(
                             "success", false,
                             "message", e.getMessage()
+                    ));
+        }
+    }
+
+    @PostMapping("/logout/courier")
+    public ResponseEntity<Map<String, Object>> logout(Authentication authentication) {
+        try {
+            courierAuthService.logout(authentication);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Logout successful"
+            ));
+        } catch (Exception e) {
+            log.error("Error during courier logout: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "success", false,
+                            "message", "Logout failed due to a server error"
                     ));
         }
     }

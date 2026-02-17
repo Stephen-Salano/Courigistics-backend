@@ -353,4 +353,13 @@ public class CourierAuthServiceImpl implements CourierAuthService {
                 account.getEmail(), account.getAccountType().name()
         );
     }
+
+    @Override
+    @Transactional
+    public void logout(Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof Account account){
+            log.info("Courier logout: {}", account.getUsername());
+            refreshTokenRepository.invalidateAllByAccount(account);
+        }
+    }
 }
