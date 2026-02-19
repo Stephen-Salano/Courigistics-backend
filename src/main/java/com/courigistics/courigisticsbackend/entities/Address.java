@@ -1,7 +1,9 @@
 package com.courigistics.courigisticsbackend.entities;
 
+import com.courigistics.courigisticsbackend.utils.GeoUtils;
 import jakarta.persistence.*;
 import lombok.*;
+import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -41,9 +43,30 @@ public class Address {
     @Column(name = "country", nullable = false)
     private String country;
 
+    /*
+    Longitude coordinate for display and input
+    Kept as Double for compatibility with frontend and existing code
+     */
     private Double latitude;
 
+    /*
+    Longitude coordinate for display and input
+    Kept as Double for compatibility with frontend and existing code
+     */
     private Double longitude;
+
+    /**
+     * This is the PostGIS geography point for spatia queries
+     *
+     * it uses geography type (not geometry) for accurate distance calculations
+     * on Earth's surface. Automatically populated from latitude/longitude
+     * in @PrePersist and @PreUpdate
+     *
+     * Nullable to support H2 test database which doesn't have PostGIS
+     * In tests, spatial queries fall back to haversine distance in Java
+     */
+    @Column(name = "location", columnDefinition = "geography(Point, 4326)", nullable = true)
+    private Point location;
 
     @Column(name = "is_default")
     private boolean isDefault = false;
@@ -58,11 +81,24 @@ public class Address {
     protected void onCreate(){
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+        populateLocationFromCoordinates();
     }
 
     @PreUpdate
     protected void onUpdate(){
         this.updatedAt = LocalDateTime.now();
+        populateLocationFromCoordinates();
+    }
+
+    /**
+     * Populates the PostGIS location field from latitude/longitude
+     *
+     * If either coordinate is null, location is set to null to maintain consistency.
+     * This method is private and only called by lifecycle hooks to ensure
+     * location is always in sync with lat/lng coordinates.
+     */
+    private void populateLocationFromCoordinates() {
+        this.location = GeoUtils.createPointSafe(this.latitude, this.longitude);
     }
 
 }
