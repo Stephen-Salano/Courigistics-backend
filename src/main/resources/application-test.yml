@@ -6,8 +6,8 @@ spring:
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    defer-datasource-initialization: true
+      ddl-auto: create-drop # recreate the schema on each tests run
+    defer-datasource-initialization: true # debugging SQL queries
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
@@ -28,6 +28,10 @@ spring:
     port: ${TEST_MAIL_PORT:2525}
     username: ${TEST_MAIL_USERNAME} # Your Mail trap username from env vars
     password: ${TEST_MAIL_PASSWORD} # Your Mail trap password from env vars
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data-test.sql # test file
 
 
 # Test-specific Logging
