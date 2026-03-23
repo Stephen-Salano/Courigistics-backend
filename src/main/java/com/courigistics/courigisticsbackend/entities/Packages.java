@@ -38,10 +38,10 @@ public class Packages {
     private String trackingNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_acc_id", unique = true, nullable = false)
+    @JoinColumn(name = "sender_acc_id", nullable = false)
     private Account senderAccount;
 
-    @Column(name = "description", nullable = true)
+    @Column(name = "description")
     private String description;
 
     /**
@@ -142,31 +142,6 @@ public class Packages {
     protected void onCreate() {
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
-        }
-        populateDefaultsFromCategory();
-    }
-
-    /**
-     * Auto-fills dimensions and weight from PackageCategory if not manually set
-     *
-     * This is called on entity creation to ensure packages always have size specs
-     * for capacity validation, even if customer didn't manually enter them.
-     */
-    private void populateDefaultsFromCategory() {
-        if (this.packageCategory != null) {
-            // Only auto-fill if values are null (customer didn't override)
-            if (this.weightKg == null) {
-                this.weightKg = this.packageCategory.getMaxWeightKg();
-            }
-            if (this.lengthCm == null) {
-                this.lengthCm = this.packageCategory.getLengthCm();
-            }
-            if (this.widthCm == null) {
-                this.widthCm = this.packageCategory.getWidthCm();
-            }
-            if (this.heightCm == null) {
-                this.heightCm = this.packageCategory.getHeightCm();
-            }
         }
     }
 

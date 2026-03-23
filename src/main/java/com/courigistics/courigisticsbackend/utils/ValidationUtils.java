@@ -1,12 +1,12 @@
 package com.courigistics.courigisticsbackend.utils;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.util.Assert;
 
-@AllArgsConstructor
+
 @NoArgsConstructor
 public class ValidationUtils {
+
     public static void validatePasswordsMatch(String password, String confirmPassword){
         /**
          * Validates that password and confirmPassword match

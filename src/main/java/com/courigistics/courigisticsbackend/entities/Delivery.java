@@ -49,7 +49,7 @@ public class Delivery {
     private String recipientPhone;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "courier_id", nullable = false, updatable = true)
+    @JoinColumn(name = "courier_id")
     private Courier courier;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,7 +69,7 @@ public class Delivery {
     private RouteType routeType;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "pickup_address_id", updatable = true, nullable = false)
+    @JoinColumn(name = "pickup_address_id", nullable = false)
     private Address pickupAddress;
 
     @Column(name = "pickup_lat")
@@ -80,7 +80,7 @@ public class Delivery {
 
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "dropoff_address_id", unique = true, updatable = true, nullable = false)
+    @JoinColumn(name = "dropoff_address_id", unique = true, nullable = false)
     private Address dropoffAddress;
 
     @Column(name = "dropoff_lat")

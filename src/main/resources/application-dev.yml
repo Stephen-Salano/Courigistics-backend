@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: ${DB_DEV_URL:jdbc:postgresql://localhost:5432/courigistics_dev}
-    username: ${DB_DEV_USERNAME:your_db_user}
+    username: ${DB_DEV_USERNAME}
     password: ${DB_DEV_PASSWORD:your_db_password}
     driver-class-name: org.postgresql.Driver
   jpa:

@@ -37,7 +37,7 @@ public class Vehicles {
     @OneToOne(fetch = FetchType.LAZY)
     private Courier courier;
 
-    @JoinColumn(name = "depot_id", nullable = true)
+    @JoinColumn(name = "depot_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Depot depot;
 
@@ -162,23 +162,11 @@ public class Vehicles {
      */
     private PackageCategory getDefaultCategoryForVehicleType(VehicleType vehicleType) {
         return switch (vehicleType) {
-            case BIKE -> PackageCategory.SMALL_PARCEL;   // Backpack/box capacity
-            case CAR -> PackageCategory.MEDIUM_PARCEL;    // Trunk capacity
-            case VAN -> PackageCategory.LARGE_PARCEL;     // Cargo area capacity
-            case TRUCK -> PackageCategory.FURNITURE;      // Full bed capacity
+            case BIKE -> PackageCategory.SMALL;   // Backpack/box capacity
+            case CAR -> PackageCategory.MEDIUM;    // Trunk capacity
+            case VAN -> PackageCategory.LARGE;     // Cargo area capacity
+            case TRUCK -> PackageCategory.X_LARGE;      // Full bed capacity
         };
-    }
-
-    /**
-     * Checks if this vehicle can carry a package of the given category
-     *
-     * Uses enum ordinal comparison - categories are ordered small to large.
-     *
-     * @param category the package category to check
-     * @return true if this vehicle can carry packages of that category
-     */
-    public boolean canCarry(PackageCategory category) {
-        return category.canBeCarriedBy(this.maxPackageCategory);
     }
 
 }
