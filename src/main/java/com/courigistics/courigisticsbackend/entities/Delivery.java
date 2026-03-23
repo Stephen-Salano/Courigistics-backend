@@ -38,8 +38,9 @@ public class Delivery {
     @JoinColumn(name = "sender_acc_id", nullable = false)
     private Account sender;
 
+    // unique = true on recipient means that two deliveries can never share the same recipient
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipient_acc_id", unique = true)
+    @JoinColumn(name = "recipient_acc_id")
     private Account recipient;
 
     @Column(name = "recipient_name")
@@ -79,8 +80,9 @@ public class Delivery {
     private Double pickupLon;
 
 
+    // unique = true means two deliveries can never go to the same address
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "dropoff_address_id", unique = true, nullable = false)
+    @JoinColumn(name = "dropoff_address_id", nullable = false)
     private Address dropoffAddress;
 
     @Column(name = "dropoff_lat")

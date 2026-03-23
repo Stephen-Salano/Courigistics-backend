@@ -97,4 +97,17 @@ public interface DepotRepository extends JpaRepository<Depot, UUID> {
      * Used during depot creation to prevent duplicates
      */
     boolean existsByCode(String code);
+
+    @Query(value = """
+    SELECT ST_Distance(
+        ST_MakePoint(:lon1, :lat1)::geography,
+        ST_MakePoint(:lon2, :lat2)::geography
+    ) / 1000
+    """, nativeQuery = true)
+    double calculateDistanceBetweenPoints(
+            @Param("lat1") double lat1,
+            @Param("lon1") double lon1,
+            @Param("lat2") double lat2,
+            @Param("lon2") double lon2
+    );
 }
