@@ -1,6 +1,7 @@
 package com.courigistics.courigisticsbackend.config.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -96,9 +97,9 @@ public class JwtService {
         try{
             byte[] keyBytes = Decoders.BASE64.decode(signingKey);
             return Keys.hmacShaKeyFor(keyBytes);
-        } catch (Exception e){
+        } catch (IllegalArgumentException e){
             log.error("Signing key error: {}", e.getMessage(), e);
-            throw new RuntimeException("Invalid Signing key", e);
+            throw new IllegalStateException("Invalid Signing key configuration", e);
         }
     }
 
@@ -123,7 +124,7 @@ public class JwtService {
 
             log.debug("Token validity for {}:{}", username, valid);
             return valid;
-        } catch (Exception e){
+        } catch (JwtException e){
             log.warn("Token validation failed: {}", e.getMessage());
             return false;
         }
@@ -135,7 +136,7 @@ public class JwtService {
             boolean valid = audienceSet != null && audienceSet.contains(audience);
             if (!valid) log.warn("Audience mismatch: expected contains={}, actual={}", audience, audienceSet);
             return valid;
-        } catch (Exception e){
+        } catch (JwtException e){
             log.warn("Audience validation failed:{}", e.getMessage());
             return false;
         }
@@ -148,7 +149,7 @@ public class JwtService {
             boolean valid = expected.equals(actual);
             if(!valid) log.warn("Issuer mismatch: expected={}, actual={}", expected, actual);
             return valid;
-        } catch (Exception e){
+        } catch (JwtException e){
             log.warn("Issuer validation failed: {}", e.getMessage());
             return false;
         }
@@ -160,7 +161,7 @@ public class JwtService {
             boolean expired = exp.before(new Date());
             if (expired) log.debug("Token expired at{}", exp);
             return expired;
-        } catch (Exception e){
+        } catch (JwtException e){
             log.warn("Token expiration check failed: {}", e.getMessage());
             return true;
         }
@@ -182,9 +183,12 @@ public class JwtService {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-        } catch (Exception e){
-            log.error("Token parsing failed: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to parse JWT token", e);
+        } catch (JwtException e) {
+            // Re-throw JWT exceptions to be handled by the security filter without logging stack trace here
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during JWT parsing: {}", e.getMessage());
+            throw new IllegalStateException("Internal error processing authentication token", e);
         }
     }
 
@@ -196,7 +200,7 @@ public class JwtService {
                     claims.get(ENVIRONMENT_CLAIM),
                     claims.get(TOKEN_TYPE_CLAIM),
                     claims.getExpiration());
-        }catch (Exception e){
+        }catch (JwtException | IllegalStateException _){
             return "invalid_token";
         }
     }

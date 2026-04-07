@@ -54,11 +54,11 @@ public class Delivery {
     private Courier courier;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origin_depot_id", nullable = false)
+    @JoinColumn(name = "origin_depot_id", nullable = true)
     private Depot originDepot;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_depot_id", nullable = false)
+    @JoinColumn(name = "destination_depot_id", nullable = true)
     private Depot destinationDepot;
 
     @Column(name = "delivery_mode")
@@ -93,6 +93,12 @@ public class Delivery {
 
     @Column(name = "estimated_distance_km")
     private Double estimatedDistanceKm;
+
+    @Column(name = "route_polyline", columnDefinition = "TEXT")
+    private String routePolyline;
+
+    @Column(name = "estimated_duration_minutes")
+    private Integer estimatedDurationMinutes;
 
     @Column(name = "actual_distance_km")
     private Double actualDistanceKm;

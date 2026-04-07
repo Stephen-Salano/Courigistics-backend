@@ -1,16 +1,19 @@
 package com.courigistics.courigisticsbackend.services.email;
 
+import com.courigistics.courigisticsbackend.exceptions.EmailSendingException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.exceptions.TemplateEngineException;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -28,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService{
 
+    public static final String FIRST_NAME = "firstName";
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
@@ -62,7 +66,7 @@ public class EmailServiceImpl implements EmailService{
 
                 // Create Thymeleaf context with variables
                 Context context = new Context();
-                context.setVariable("firstName", firstName);
+                context.setVariable(FIRST_NAME, firstName);
                 context.setVariable("verificationLink", verificationLink);
 
                 // Process template
@@ -73,9 +77,9 @@ public class EmailServiceImpl implements EmailService{
 
                 log.info("[{}] Courier verification email sent successfully to: {}", threadName, to);
                 return CompletableFuture.completedFuture(null);
-            } catch (Exception e) {
+            } catch (MessagingException | MailException | TemplateEngineException e) {
                 log.error("[{}] Failed to send courier verification email to: {}", threadName, to, e);
-                throw new RuntimeException("Failed to send verification email", e);
+                throw new EmailSendingException("Failed to send verification email", e);
             }
     }
 
@@ -94,7 +98,7 @@ public class EmailServiceImpl implements EmailService{
 
             try {
                 Context context = new Context();
-                context.setVariable("firstName", firstName);
+                context.setVariable(FIRST_NAME, firstName);
 
                 String htmlContent = templateEngine.process("courier-pending-approval", context);
 
@@ -102,9 +106,9 @@ public class EmailServiceImpl implements EmailService{
 
                 log.info("[{}] Pending approval email sent successfully to: {}", threadName, to);
                 return CompletableFuture.completedFuture(null);
-            } catch (Exception e) {
+            } catch (MessagingException | MailException | TemplateEngineException e) {
                 log.error("[{}] Failed to send pending approval email to: {}", threadName, to, e);
-                throw new RuntimeException("Failed to send pending approval email", e);
+                throw new EmailSendingException("Failed to send pending approval email", e);
             }
     }
 
@@ -119,7 +123,7 @@ public class EmailServiceImpl implements EmailService{
                 String setupLink = String.format("%s:%s/api/v1/auth/setup-account/courier?token=%s", backendBaseUrl, serverPort, setupToken);
 
                 Context context = new Context();
-                context.setVariable("firstName", firstName);
+                context.setVariable(FIRST_NAME, firstName);
                 context.setVariable("employeeId", employeeId);
                 context.setVariable("setupLink", setupLink);
 
@@ -129,9 +133,9 @@ public class EmailServiceImpl implements EmailService{
 
                 log.info("[{}] Courier employee approval email sent successfully to: {}", threadName, to);
                 return CompletableFuture.completedFuture(null);
-            } catch (Exception e) {
+            } catch (MessagingException | MailException | TemplateEngineException e) {
                 log.error("[{}] Failed to send courier employee approval email to: {}", threadName, to, e);
-                throw new RuntimeException("Failed to send approval email", e);
+                throw new EmailSendingException("Failed to send approval email", e);
             }
     }
 
@@ -145,15 +149,15 @@ public class EmailServiceImpl implements EmailService{
                 // Build setup link to point to the BACKEND
                 String setupLink = String.format("%s:%s/api/v1/auth/setup-account/courier?token=%s", backendBaseUrl, serverPort, setupToken);
                 Context context = new Context();
-                context.setVariable("firstName", firstName);
+                context.setVariable(FIRST_NAME, firstName);
                 context.setVariable("setupLink", setupLink);
 
                 String htmlContent = templateEngine.process("courier-freelancer-approved", context);
                 sendHtmlEmail(to, "🎉 Application Approved - Set Up Your Account", htmlContent);
                 return CompletableFuture.completedFuture(null);
-            } catch (Exception e) {
+            } catch (MessagingException | MailException | TemplateEngineException e) {
                 log.error("[{}] Failed to send courier freelancer approval email to: {}", threadName, to, e);
-                throw new RuntimeException("Failed to send approval email", e);
+                throw new EmailSendingException("Failed to send approval email", e);
             }
     }
 
@@ -173,7 +177,7 @@ public class EmailServiceImpl implements EmailService{
 
             try{
                 Context context = new Context();
-                context.setVariable("firstName", firstName);
+                context.setVariable(FIRST_NAME, firstName);
                 context.setVariable("username", username);
 
                 String htmlContent = templateEngine.process("courier-account-ready", context);
@@ -182,9 +186,9 @@ public class EmailServiceImpl implements EmailService{
 
                 log.info("[{}] Account ready email sent successfully to: {}", threadName, to);
                 return CompletableFuture.completedFuture(null);
-            } catch (Exception e){
+            } catch (MessagingException | MailException | TemplateEngineException e){
                 log.error("[{}] Failed to send account ready email to: {}", threadName, to, e);
-                throw new RuntimeException("Failed to send account ready email", e);
+                throw new EmailSendingException("Failed to send account ready email", e);
             }
     }
 
@@ -207,7 +211,7 @@ public class EmailServiceImpl implements EmailService{
                 String verificationLink = String.format("%s:%s/api/v1/auth/verify/customer?token=%s", backendBaseUrl, serverPort, token);
 
                 Context context = new Context();
-                context.setVariable("firstName", firstName);
+                context.setVariable(FIRST_NAME, firstName);
                 context.setVariable("verificationLink", verificationLink);
 
                 String htmlContent = templateEngine.process("customer-verification", context);
@@ -216,10 +220,34 @@ public class EmailServiceImpl implements EmailService{
 
                 log.info("[{}] Customer verification email sent successfully to: {}", threadName, to);
                 return CompletableFuture.completedFuture(null);
-            }catch (Exception e){
+            }catch (MessagingException | MailException | TemplateEngineException e){
                 log.error("[{}] Failed to send customer verification email to: {}", threadName, to, e);
-                throw new RuntimeException("Failed to send verification email", e);
+                throw new EmailSendingException("Failed to send verification email", e);
             }
+    }
+
+    @Async("emailTaskExecutor")
+    @Override
+    public CompletableFuture<Void> sendDeliveryAssignedEmail(String to, String firstName, String deliveryNumber, String courierName) {
+        String threadName = Thread.currentThread().getName();
+        log.info("[{}] Sending delivery assigned email to: {} for delivery: {}", threadName, to, deliveryNumber);
+
+        try {
+            Context context = new Context();
+            context.setVariable(FIRST_NAME, firstName);
+            context.setVariable("deliveryNumber", deliveryNumber);
+            context.setVariable("courierName", courierName);
+
+            String htmlContent = templateEngine.process("delivery-assigned", context);
+
+            sendHtmlEmail(to, "Delivery Confirmed: Courier Assigned - CouriGistics", htmlContent);
+
+            log.info("[{}] Delivery assigned email sent successfully to: {}", threadName, to);
+            return CompletableFuture.completedFuture(null);
+        } catch (MessagingException | MailException | TemplateEngineException e) {
+            log.error("[{}] Failed to send delivery assigned email to: {}", threadName, to, e);
+            throw new EmailSendingException("Failed to send delivery confirmation email", e);
+        }
     }
 
     /**
@@ -240,7 +268,7 @@ public class EmailServiceImpl implements EmailService{
                 String resetLink = String.format("%s:%s/api/v1/auth/reset-password?token=%s", backendBaseUrl, serverPort, token);
 
                 Context context = new Context();
-                context.setVariable("firstName", firstName);
+                context.setVariable(FIRST_NAME, firstName);
                 context.setVariable("resetLink", resetLink);
 
                 String htmlContent = templateEngine.process("password-reset",  context);
@@ -248,9 +276,9 @@ public class EmailServiceImpl implements EmailService{
                 sendHtmlEmail(to, "Password Reset Request - CouriGistics", htmlContent);
                 log.info("[{}] Password reset email sent successfully to: {}", threadName, to);
                 return CompletableFuture.completedFuture(null);
-            } catch (Exception e){
+            } catch (MessagingException | MailException | TemplateEngineException e){
                 log.error("[{}] Failed to send password reset email to: {}", threadName, to, e);
-                throw new RuntimeException("Failed to send reset email", e);
+                throw new EmailSendingException("Failed to send reset email", e);
             }
     }
 

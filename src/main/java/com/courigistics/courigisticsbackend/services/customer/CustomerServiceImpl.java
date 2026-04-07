@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,9 +43,11 @@ public class CustomerServiceImpl implements CustomerService {
                         addr.getCity(),
                         addr.getPostalCode(),
                         addr.getCountry(),
+                        addr.getLatitude(),
+                        addr.getLongitude(),
                         addr.isDefault()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         return new CustomerProfileResponse(
                 customer.getFirstName(),

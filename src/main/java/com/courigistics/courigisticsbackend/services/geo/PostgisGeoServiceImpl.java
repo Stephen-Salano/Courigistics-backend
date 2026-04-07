@@ -44,6 +44,7 @@ public class PostgisGeoServiceImpl implements GeoService{
 
     @Override
     public List<Courier> findNearbyFreelancers(double latitude, double longitude, String city) {
-        return List.of();
+        log.debug("[PostGIS] Finding nearby freelancers for ({}, {}) in {}", latitude, longitude, city);
+        return courierRepository.findAvailableFreelancersNearPoint(latitude, longitude, FREELANCER_RADIUS_METERS, city);
     }
 }

@@ -88,6 +88,17 @@ public interface EmailService {
     CompletableFuture<Void> sendCustomerVerificationEmail(String to, String token, String firstName);
 
     /**
+     * Sends delivery confirmation email to customer asynchronously
+     *
+     * @param to Customer email address
+     * @param firstName Customer first name
+     * @param deliveryNumber tracking/delivery number
+     * @param courierName name of assigned courier
+     * @return CompletableFuture
+     */
+    CompletableFuture<Void> sendDeliveryAssignedEmail(String to, String firstName, String deliveryNumber, String courierName);
+
+    /**
      * Sends password reset email asynchronously
      *
      * Use case: User requests password reset

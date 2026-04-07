@@ -19,6 +19,8 @@ public record CustomerProfileResponse(
             String city,
             String postalCode,
             String country,
+            Double latitude,
+            Double longitude,
             boolean isDefault
     ) {}
 }

@@ -52,6 +52,10 @@ public record CreateDeliveryRequest(
         @NotNull(message = "Google Maps distance is required")
         Double googleMapsDistanceKm,
 
+        String routePolyline,
+
+        Integer estimatedDurationMinutes,
+
         @NotBlank(message = "Recipient name is required")
         String recipientName,
 
