@@ -40,6 +40,15 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(EmailSendingException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailSendingException(EmailSendingException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                        "success", false,
+                        "message", ex.getMessage()
+                ));
+    }
+
     // Handle validation errors (e.g., @Valid failures)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
