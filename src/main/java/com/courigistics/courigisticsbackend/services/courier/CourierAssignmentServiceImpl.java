@@ -95,11 +95,22 @@ public class CourierAssignmentServiceImpl implements CourierAssignmentService {
                 courier.getCurrentLon() != null ? courier.getCurrentLon() : 0
         );
 
+        Vehicles v = vehicleRepository.findByCourier_id(courier.getId()).orElse(null);
+        com.courigistics.courigisticsbackend.dto.responses.courier.VehicleDetailDTO vehicleDetail = v != null ?
+                com.courigistics.courigisticsbackend.dto.responses.courier.VehicleDetailDTO.builder()
+                        .type(v.getVehicleType())
+                        .make(v.getMake())
+                        .model(v.getModel())
+                        .color(v.getVehicleColor())
+                        .licensePlate(v.getLicencePlate())
+                        .build() : null;
+
         return new TierOptionResponse.CourierSummary(
                 courier.getId(),
                 courier.getFirstName(),
                 5.0, // Mock rating for now
-                dist
+                dist,
+                vehicleDetail
         );
     }
 

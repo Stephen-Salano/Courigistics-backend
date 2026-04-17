@@ -200,7 +200,7 @@ public class JwtService {
                     claims.get(ENVIRONMENT_CLAIM),
                     claims.get(TOKEN_TYPE_CLAIM),
                     claims.getExpiration());
-        }catch (JwtException | IllegalStateException _){
+        }catch (JwtException | IllegalStateException e){
             return "invalid_token";
         }
     }

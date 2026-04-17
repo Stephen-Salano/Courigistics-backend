@@ -71,8 +71,8 @@ public interface CourierRepository extends JpaRepository<Courier, UUID> {
                  )
         """, nativeQuery = true)
     List<Courier> findAvailableFreelancersNearPoint(
-            @Param("latitude") double latitude,
             @Param("longitude") double longitude,
+            @Param("latitude") double latitude,
             @Param("radiusMeters") double radiusMeters,
             @Param("city") String city
     );
@@ -137,4 +137,7 @@ public interface CourierRepository extends JpaRepository<Courier, UUID> {
     @Query("SELECT COUNT(c) FROM Courier c WHERE YEAR(c.createdAt) = :year")
     long countByCreatedAtYear(@Param("year") int year);
 
+    long countByIsOnlineTrue();
+
+    long countByPendingApprovalTrue();
 }

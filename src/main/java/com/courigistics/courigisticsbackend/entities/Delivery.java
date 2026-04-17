@@ -97,6 +97,12 @@ public class Delivery {
     @Column(name = "route_polyline", columnDefinition = "TEXT")
     private String routePolyline;
 
+    @Column(name = "current_lat")
+    private Double currentLat;
+
+    @Column(name = "current_lon")
+    private Double currentLon;
+
     @Column(name = "estimated_duration_minutes")
     private Integer estimatedDurationMinutes;
 
@@ -126,6 +132,12 @@ public class Delivery {
 
     @Column(name = "actual_pickup_time")
     private LocalDateTime actualPickupTime;
+
+    @Column(name = "arrived_at_pickup_at")
+    private LocalDateTime arrivedAtPickupAt;
+
+    @Column(name = "arrived_at_dropoff_at")
+    private LocalDateTime arrivedAtDropoffAt;
 
     @Column(name = "estimated_delivery_time")
     private LocalDateTime estimatedDeliveryTime;

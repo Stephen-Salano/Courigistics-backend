@@ -33,8 +33,9 @@ public record CustomerRegisterRequest(
         @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Phone number must be valid") // Basic phone number validation
         String phoneNumber,
         // Addresses
+        @NotEmpty(message = "At least one address is required")
         @Valid
-        AddressDTO addressDTO
+        java.util.List<AddressDTO> addresses
 
 ) {
 }

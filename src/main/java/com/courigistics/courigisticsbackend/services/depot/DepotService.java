@@ -15,6 +15,16 @@ public interface DepotService {
     Depot findNearestDepotFor(double latitude, double longitude);
 
     /**
+     * Finds the nearest active depot covering the given coordinates.
+     * Returns empty if no depot covers the location.
+     *
+     * @param latitude  pickup or dropoff latitude
+     * @param longitude pickup or dropoff longitude
+     * @return optional containing the nearest covering depot
+     */
+    java.util.Optional<Depot> findOptionalNearestDepotFor(double latitude, double longitude);
+
+    /**
      * Returns true if any active depot covers the given coordinates.
      * Used to validate pickup/dropoff addresses before creating a delivery.
      *

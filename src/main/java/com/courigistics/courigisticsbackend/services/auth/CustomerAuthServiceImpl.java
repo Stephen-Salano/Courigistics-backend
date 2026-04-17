@@ -18,7 +18,6 @@ import com.courigistics.courigisticsbackend.services.verification_token.Verifica
 import com.courigistics.courigisticsbackend.utils.PhoneNumberUtils;
 import com.courigistics.courigisticsbackend.utils.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,13 +70,15 @@ public class CustomerAuthServiceImpl implements AuthService {
             // 3. Establish bidirectional relationships
             account.setCustomer(customer);
 
-            // Conditionally create and link address:
-            if (request.addressDTO() != null){
-                log.debug("AddressDTO provided, creating and linking address.");
-                Address address = createAddressEntity(request.addressDTO(), account);
-                account.setAddresses(List.of(address));
-            }else {
-                log.debug("No AddressDTO provided, skipping address creation");
+            // Create and link multiple addresses
+            if (request.addresses() != null && !request.addresses().isEmpty()) {
+                log.debug("Mapping {} addresses to account.", request.addresses().size());
+                List<Address> addressEntities = request.addresses().stream()
+                        .map(dto -> createAddressEntity(dto, account))
+                        .toList();
+                account.setAddresses(addressEntities);
+            } else {
+                log.debug("No addresses provided during registration.");
             }
 
             // 4. Save the parent entity. Cascade will handle the rest.
@@ -128,15 +129,12 @@ public class CustomerAuthServiceImpl implements AuthService {
                 .build();
     }
 
-    private Address createAddressEntity(
-            @NotBlank(message = "Address must be entered") AddressDTO addressDTO,
-            Account account
-    ) {
+    private Address createAddressEntity(AddressDTO addressDTO, Account account) {
 
         Address addressEntity = new Address();
         addressEntity.setAccount(account);
 
-        if (addressDTO.label().isBlank()){
+        if (addressDTO.label() == null || addressDTO.label().isBlank()){
             addressEntity.setLabel("Home address");
         }else {
             addressEntity.setLabel(addressDTO.label());
@@ -146,8 +144,9 @@ public class CustomerAuthServiceImpl implements AuthService {
         addressEntity.setCity(addressDTO.city());
         addressEntity.setPostalCode(addressDTO.postalCode());
         addressEntity.setCountry(addressDTO.country());
+        addressEntity.setLatitude(addressDTO.latitude());
+        addressEntity.setLongitude(addressDTO.longitude());
 
-        // TODO: We will get the lats and longs from where the user's device is or when the user sets a Location for delivery
         return addressEntity;
     }
 

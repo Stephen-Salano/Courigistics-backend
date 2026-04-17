@@ -2,9 +2,12 @@ package com.courigistics.courigisticsbackend.services.delivery;
 
 import com.courigistics.courigisticsbackend.dto.requests.delivery.ConfirmDeliveryRequest;
 import com.courigistics.courigisticsbackend.dto.requests.delivery.CreateDeliveryRequest;
+import com.courigistics.courigisticsbackend.dto.requests.delivery.DeliveryMilestoneRequest;
 import com.courigistics.courigisticsbackend.dto.requests.delivery.DeliveryQuoteRequest;
 import com.courigistics.courigisticsbackend.dto.responses.delivery.DeliveryCreationResponse;
+import com.courigistics.courigisticsbackend.dto.responses.delivery.DeliveryResponse;
 import com.courigistics.courigisticsbackend.dto.responses.delivery.TierOptionResponse;
+import com.courigistics.courigisticsbackend.dto.responses.delivery.TrackingResponse;
 import com.courigistics.courigisticsbackend.entities.enums.DeliveryStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -53,4 +56,14 @@ public interface DeliveryService {
      * Cancels a delivery if it is in an allowed state (e.g., CREATED or OFFERED).
      */
     void cancelDelivery(Authentication auth, UUID deliveryId);
+
+    /**
+     * Updates delivery milestone during simulation.
+     */
+    void updateDeliveryMilestone(Authentication auth, UUID deliveryId, DeliveryMilestoneRequest request);
+
+    /**
+     * Gets real-time tracking information for a delivery.
+     */
+    TrackingResponse getTrackingInfo(UUID deliveryId);
 }

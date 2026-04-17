@@ -48,6 +48,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        String path = request.getRequestURI();
+
         // 1: Skip filter for public endpoints if no token is present
         if (shouldNotFilter(request)){
             filterChain.doFilter(request, response);
@@ -62,22 +64,35 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 authenticateRequest(token, request, response);
             } catch (JwtException e) {
-                log.warn("Invalid JWT token received: {}, Details:{}", jwtService.getTokenMetadata(token), e.getMessage());
-                sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
-                return; // Stop filter chain
+                log.warn("Invalid JWT token received for path {}: {}, Details:{}", path, jwtService.getTokenMetadata(token), e.getMessage());
+                if (!isPublicPath(path)) {
+                    sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
+                    return; // Stop filter chain for protected routes
+                }
+                // For public routes, we just continue as anonymous
             } catch (LockedException e) {
                 log.warn("Authentication attempt for a locked/disabled account: {}", e.getMessage());
                 sendError(response, HttpServletResponse.SC_FORBIDDEN, e.getMessage());
                 return; // Stop filter chain
             } catch (Exception e) {
                 log.warn("An unexpected error occurred during JWT processing for user {}", jwtService.extractUsername(token), e);
-                sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Authentication processing error");
-                return; // Stop filter chain
+                if (!isPublicPath(path)) {
+                    sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Authentication processing error");
+                    return; // Stop filter chain
+                }
             }
         }
 
         // 3. continue the filter chain
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isPublicPath(String path) {
+        return path.startsWith("/api/v1/public/") || 
+               path.startsWith("/api/v1/auth/health") ||
+               path.startsWith("/swagger-ui") ||
+               path.startsWith("/v3/api-docs") ||
+               path.startsWith("/h2-console");
     }
 
     private void sendError(@NonNull HttpServletResponse response, int httpStatus, String message) throws IOException {

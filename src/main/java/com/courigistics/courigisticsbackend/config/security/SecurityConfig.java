@@ -52,6 +52,7 @@ public class SecurityConfig {
             "/api/v1/auth/reset-password/*", // for password reset success
             "/api/v1/auth/setup-account/*",
             "/api/v1/auth/check-availability",
+            "/api/v1/public/**",
     };
 
     // Dev test endpoints

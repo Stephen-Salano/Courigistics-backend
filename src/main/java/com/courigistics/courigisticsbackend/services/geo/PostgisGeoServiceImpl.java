@@ -28,23 +28,23 @@ public class PostgisGeoServiceImpl implements GeoService{
     public Optional<Depot> findNearestDepot(double latitude, double longitude) {
         log.debug("[PostGIS] Finding nearest depot for ({}, {})", latitude, longitude);
 
-        return depotRepository.findNearestDepotWithinRadius(latitude, longitude);
+        return depotRepository.findNearestDepotWithinRadius(longitude, latitude);
     }
 
     @Override
     public boolean isWithinCoverage(double latitude, double longitude) {
-        return depotRepository.findNearestDepotWithinRadius(latitude, longitude).isPresent();
+        return depotRepository.findNearestDepotWithinRadius(longitude, latitude).isPresent();
     }
 
     @Override
     public double calculateDistanceKm(double lat1, double lon1, double lat2, double lon2) {
         log.debug("[PostGIS] Calculating ST_Distance between ({},{}) and ({},{})", lat1, lon1, lat2, lon2);
-        return depotRepository.calculateDistanceBetweenPoints(lat1, lon1, lat2, lon2);
+        return depotRepository.calculateDistanceBetweenPoints(lon1, lat1, lon2, lat2);
     }
 
     @Override
     public List<Courier> findNearbyFreelancers(double latitude, double longitude, String city) {
         log.debug("[PostGIS] Finding nearby freelancers for ({}, {}) in {}", latitude, longitude, city);
-        return courierRepository.findAvailableFreelancersNearPoint(latitude, longitude, FREELANCER_RADIUS_METERS, city);
+        return courierRepository.findAvailableFreelancersNearPoint(longitude, latitude, FREELANCER_RADIUS_METERS, city);
     }
 }

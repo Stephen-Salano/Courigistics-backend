@@ -1,5 +1,6 @@
 package com.courigistics.courigisticsbackend.dto.responses.delivery;
 
+import com.courigistics.courigisticsbackend.dto.responses.courier.VehicleDetailDTO;
 import com.courigistics.courigisticsbackend.entities.enums.VehicleType;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public record TierOptionResponse(
             UUID courierId,
             String firstName,
             Double rating,
-            Double distanceKm
+            Double distanceKm,
+            VehicleDetailDTO vehicle
     ) {}
 }

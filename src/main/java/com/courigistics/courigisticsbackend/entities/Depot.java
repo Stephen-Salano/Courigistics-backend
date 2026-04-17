@@ -98,7 +98,7 @@ public class Depot {
     private DepotStatus status = DepotStatus.ACTIVE;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     // Relationships
     @OneToMany(mappedBy = "depot")
@@ -112,10 +112,8 @@ public class Depot {
      */
     @PrePersist
     protected void onCreate(){
-        if (this.createdAt == null){
-            this.createdAt = LocalDateTime.now();
-            populateLocationFromCoordinates();
-        }
+        this.createdAt = LocalDateTime.now();
+        populateLocationFromCoordinates();
     }
 
     /**

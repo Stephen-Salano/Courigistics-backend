@@ -5,7 +5,6 @@ import com.courigistics.courigisticsbackend.entities.Depot;
 import com.courigistics.courigisticsbackend.entities.enums.CourierStatus;
 import com.courigistics.courigisticsbackend.entities.enums.DepotStatus;
 import com.courigistics.courigisticsbackend.entities.enums.EmploymentType;
-import com.courigistics.courigisticsbackend.entities.enums.VehicleType;
 import com.courigistics.courigisticsbackend.repositories.CourierRepository;
 import com.courigistics.courigisticsbackend.repositories.DepotRepository;
 import com.courigistics.courigisticsbackend.utils.GeoUtils;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 /**
  * Haversine-based GeoService — active on the 'test' profile only.
  *
@@ -51,7 +50,7 @@ public class HaverSineGeoServiceImpl implements GeoService{
                 })
                 .min(Comparator.comparingDouble(depot -> GeoUtils.haversineDistance(
                         latitude, longitude,
-                        depot.getLatitude(), depot.getLatitude()
+                        depot.getLatitude(), depot.getLongitude()
                 )));
     }
 

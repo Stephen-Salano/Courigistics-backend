@@ -4,8 +4,9 @@ import com.courigistics.courigisticsbackend.dto.requests.delivery.ConfirmDeliver
 import com.courigistics.courigisticsbackend.dto.requests.delivery.CreateDeliveryRequest;
 import com.courigistics.courigisticsbackend.dto.requests.delivery.DeliveryQuoteRequest;
 import com.courigistics.courigisticsbackend.dto.responses.delivery.DeliveryCreationResponse;
+import com.courigistics.courigisticsbackend.dto.responses.delivery.DeliveryResponse;
 import com.courigistics.courigisticsbackend.dto.responses.delivery.TierOptionResponse;
-import com.courigistics.courigisticsbackend.services.delivery.DeliveryResponse;
+import com.courigistics.courigisticsbackend.dto.responses.delivery.TrackingResponse;
 import com.courigistics.courigisticsbackend.services.delivery.DeliveryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -28,12 +30,17 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
 
     @PostMapping("/quote")
-    public ResponseEntity<List<TierOptionResponse>> getQuote(@Valid @RequestBody DeliveryQuoteRequest request) {
-        return ResponseEntity.ok(deliveryService.getQuote(request));
+    public ResponseEntity<Map<String, Object>> getQuote(@Valid @RequestBody DeliveryQuoteRequest request) {
+        List<TierOptionResponse> tiers = deliveryService.getQuote(request);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "data", tiers,
+                "message", "Quote generated successfully"
+        ));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<DeliveryCreationResponse> createDelivery(
             Authentication auth,
             @Valid @RequestBody CreateDeliveryRequest request
@@ -42,7 +49,7 @@ public class DeliveryController {
     }
 
     @PostMapping("/{id}/confirm")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<Void> confirmDelivery(
             Authentication auth,
             @PathVariable UUID id,
@@ -53,7 +60,7 @@ public class DeliveryController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<Page<DeliveryResponse>> getMyDeliveries(
             Authentication auth,
             @PageableDefault(size = 10) Pageable pageable
@@ -66,8 +73,14 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.trackDelivery(number));
     }
 
+    @GetMapping("/{id}/tracking-info")
+    @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('ADMIN')")
+    public ResponseEntity<TrackingResponse> getTrackingInfo(@PathVariable UUID id) {
+        return ResponseEntity.ok(deliveryService.getTrackingInfo(id));
+    }
+
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<Void> cancelDelivery(Authentication auth, @PathVariable UUID id) {
         deliveryService.cancelDelivery(auth, id);
         return ResponseEntity.noContent().build();

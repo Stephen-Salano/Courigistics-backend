@@ -14,6 +14,8 @@ public record AddressDTO(
         String postalCode,
         @NotBlank(message = "Country must be entered")
         String country,
+        Double latitude,
+        Double longitude,
         boolean isDefault
 ) {
 }

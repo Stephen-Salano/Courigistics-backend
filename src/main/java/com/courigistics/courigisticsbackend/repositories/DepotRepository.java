@@ -56,8 +56,8 @@ public interface DepotRepository extends JpaRepository<Depot, UUID> {
         LIMIT 1
         """, nativeQuery = true)
     Optional<Depot> findNearestDepotWithinRadius(
-            @Param("latitude") double latitude,
-            @Param("longitude") double longitude
+            @Param("longitude") double longitude,
+            @Param("latitude") double latitude
     );
 
     /**
@@ -105,9 +105,9 @@ public interface DepotRepository extends JpaRepository<Depot, UUID> {
     ) / 1000
     """, nativeQuery = true)
     double calculateDistanceBetweenPoints(
-            @Param("lat1") double lat1,
             @Param("lon1") double lon1,
-            @Param("lat2") double lat2,
-            @Param("lon2") double lon2
+            @Param("lat1") double lat1,
+            @Param("lon2") double lon2,
+            @Param("lat2") double lat2
     );
 }

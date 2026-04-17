@@ -117,7 +117,7 @@ public class Courier {
      * updated when courier moves (via frontend location API or GPS)
      * Used to populate currentLocation Point field for spatial queries
      */
-    @Column(name = "curent_lat")
+    @Column(name = "current_lat")
     private Double currentLat;
 
     /**
@@ -147,6 +147,10 @@ public class Courier {
     @Column(name = "available_for_assignment", nullable = false)
     @Builder.Default
     private Boolean availableForAssignment = true;
+
+    @Column(name = "is_online", nullable = false)
+    @Builder.Default
+    private Boolean isOnline = false;
 
     @Column(name = "hired_at")
     private LocalDateTime hiredAt;

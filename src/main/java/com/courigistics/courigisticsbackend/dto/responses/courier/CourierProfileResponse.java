@@ -3,7 +3,9 @@ package com.courigistics.courigisticsbackend.dto.responses.courier;
 
 import com.courigistics.courigisticsbackend.entities.enums.CourierStatus;
 import com.courigistics.courigisticsbackend.entities.enums.EmploymentType;
+import lombok.Builder;
 
+@Builder
 public record CourierProfileResponse(
         String firstName,
         String lastName,
@@ -15,9 +17,14 @@ public record CourierProfileResponse(
         CourierStatus status,
         String depotName,
         String depotCode,
+        Double depotLat,
+        Double depotLon,
+        Double currentLat,
+        Double currentLon,
         VehicleDTO vehicle
 
 ) {
+    @Builder
     public record VehicleDTO(
             String vehicleType,
             String make,
