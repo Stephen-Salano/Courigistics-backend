@@ -159,4 +159,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
 
     @Query("SELECT COUNT(d) FROM Delivery d WHERE d.deliveryStatus NOT IN ('DELIVERED', 'CANCELLED', 'FAILED')")
     long countOngoingDeliveries();
+
+    long countByOriginDepot_IdOrDestinationDepot_Id(UUID originDepotId, UUID destinationDepotId);
 }

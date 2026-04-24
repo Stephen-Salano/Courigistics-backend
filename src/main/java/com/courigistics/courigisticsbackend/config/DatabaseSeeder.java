@@ -3,27 +3,31 @@ package com.courigistics.courigisticsbackend.config;
 import com.courigistics.courigisticsbackend.entities.*;
 import com.courigistics.courigisticsbackend.entities.enums.*;
 import com.courigistics.courigisticsbackend.repositories.*;
+import com.courigistics.courigisticsbackend.utils.EmployeeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Configuration
-@RequiredArgsConstructor
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
 
     private final DepotRepository depotRepository;
     private final AccountRepository accountRepository;
     private final CourierRepository courierRepository;
+    private final AdminRepository adminRepository;
     private final VehicleRepository vehicleRepository;
+    private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmployeeIdGenerator employeeIdGenerator;
 
     @Override
     @Order(1)
@@ -31,32 +35,10 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(String... args) {
         log.info("Checking if database seeding is required...");
         seedDepots();
+        seedAdmin();
+        seedCustomers();
         seedRiders();
-        logSeededRiders();
-    }
-
-    private void logSeededRiders() {
-        log.info("============================================================================");
-        log.info("SEEDED TEST RIDERS (COURIERS) FOR DEVELOPMENT");
-        log.info("============================================================================");
-        log.info("Password for all: Password123!");
-        log.info("----------------------------------------------------------------------------");
-        log.info("| Username             | City     | Vehicle |");
-        log.info("----------------------------------------------------------------------------");
-        log.info("| rider_bike           | Nairobi  | BIKE    |");
-        log.info("| rider_car            | Nairobi  | CAR     |");
-        log.info("| rider_van            | Nairobi  | VAN     |");
-        log.info("| rider_nbo_cbd        | Nairobi  | BIKE    |");
-        log.info("| rider_nbo_karen      | Nairobi  | CAR     |");
-        log.info("| rider_nbo_kasarani   | Nairobi  | BIKE    |");
-        log.info("| rider_nbo_embakasi   | Nairobi  | VAN     |");
-        log.info("| rider_ksm_cbd        | Kisumu   | BIKE    |");
-        log.info("| rider_ksm_milimani   | Kisumu   | CAR     |");
-        log.info("| rider_thika_cbd      | Thika    | BIKE    |");
-        log.info("| rider_thika_landless | Thika    | CAR     |");
-        log.info("----------------------------------------------------------------------------");
-        log.info("Map Data Public Endpoint: GET /api/v1/public/map-data");
-        log.info("============================================================================");
+        logSeededAccounts();
     }
 
     private void seedDepots() {
@@ -74,19 +56,64 @@ public class DatabaseSeeder implements CommandLineRunner {
         depotRepository.saveAll(depots);
     }
 
-    private Depot createDepot(String name, String code, String address, String city, Double lat, Double lon, Double radius) {
-        Depot depot = new Depot();
-        depot.setName(name);
-        depot.setCode(code);
-        depot.setAddress(address);
-        depot.setCity(city);
-        depot.setCountry("Kenya");
-        depot.setLatitude(lat);
-        depot.setLongitude(lon);
-        depot.setCoverageRadiusKm(radius);
-        depot.setStatus(DepotStatus.ACTIVE);
-        depot.setDepotType(DepotType.STANDALONE);
-        return depot;
+    private void seedAdmin() {
+        if (accountRepository.existsByEmail("admin@courigistics.com")) {
+            log.debug("Admin already seeded. Skipping.");
+            return;
+        }
+
+        log.info("Seeding Default Admin...");
+        Account account = Account.builder()
+                .username("system_admin")
+                .email("admin@courigistics.com")
+                .phone("254700000000")
+                .password(passwordEncoder.encode("Admin123!"))
+                .accountType(AccountType.ADMIN)
+                .enabled(true)
+                .emailVerified(true)
+                .accountNonLocked(true)
+                .build();
+
+        account = accountRepository.save(account);
+
+        Admin admin = Admin.builder()
+                .firstName("System")
+                .lastName("Administrator")
+                .employeeId(employeeIdGenerator.generateEmployeeId())
+                .department("Management")
+                .account(account)
+                .build();
+
+        adminRepository.save(admin);
+    }
+
+    private void seedCustomers() {
+        if (accountRepository.existsByEmail("john@example.com")) {
+            log.debug("Customer already seeded. Skipping.");
+            return;
+        }
+
+        log.info("Seeding Test Customer...");
+        Account account = Account.builder()
+                .username("john_doe")
+                .email("john@example.com")
+                .phone("254711111111")
+                .password(passwordEncoder.encode("Password123!"))
+                .accountType(AccountType.CUSTOMER)
+                .enabled(true)
+                .emailVerified(true)
+                .accountNonLocked(true)
+                .build();
+
+        account = accountRepository.save(account);
+
+        Customer customer = Customer.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .account(account)
+                .build();
+
+        customerRepository.save(customer);
     }
 
     private void seedRiders() {
@@ -96,7 +123,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
 
         log.info("Seeding Test Riders...");
-        String encodedPassword = passwordEncoder.encode("Password123!");
 
         // Nairobi Riders
         createRider("rider_bike", "bike@courigistics.com", "254700000001", "Bike", "Rider", "Nairobi", -1.2674, 36.8078, VehicleType.BIKE, "Yamaha", "DT", "KMD 123A", 20.0, 0.05);
@@ -162,5 +188,51 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build();
 
         vehicleRepository.save(vehicle);
+    }
+
+    private Depot createDepot(String name, String code, String address, String city, Double lat, Double lon, Double radius) {
+        Depot depot = new Depot();
+        depot.setName(name);
+        depot.setCode(code);
+        depot.setAddress(address);
+        depot.setCity(city);
+        depot.setCountry("Kenya");
+        depot.setLatitude(lat);
+        depot.setLongitude(lon);
+        depot.setCoverageRadiusKm(radius);
+        depot.setStatus(DepotStatus.ACTIVE);
+        depot.setDepotType(DepotType.STANDALONE);
+        return depot;
+    }
+
+    private void logSeededAccounts() {
+        log.info("============================================================================");
+        log.info("SEEDED TEST ACCOUNTS FOR DEVELOPMENT");
+        log.info("============================================================================");
+        log.info("ADMIN:");
+        log.info("| Email: admin@courigistics.com | Password: Admin123! |");
+        log.info("----------------------------------------------------------------------------");
+        log.info("CUSTOMERS:");
+        log.info("| Email: john@example.com | Password: Password123! |");
+        log.info("----------------------------------------------------------------------------");
+        log.info("RIDERS (COURIERS):");
+        log.info("Password for all: Password123!");
+        log.info("----------------------------------------------------------------------------");
+        log.info("| Username             | City     | Vehicle |");
+        log.info("----------------------------------------------------------------------------");
+        log.info("| rider_bike           | Nairobi  | BIKE    |");
+        log.info("| rider_car            | Nairobi  | CAR     |");
+        log.info("| rider_van            | Nairobi  | VAN     |");
+        log.info("| rider_nbo_cbd        | Nairobi  | BIKE    |");
+        log.info("| rider_nbo_karen      | Nairobi  | CAR     |");
+        log.info("| rider_nbo_kasarani   | Nairobi  | BIKE    |");
+        log.info("| rider_nbo_embakasi   | Nairobi  | VAN     |");
+        log.info("| rider_ksm_cbd        | Kisumu   | BIKE    |");
+        log.info("| rider_ksm_milimani   | Kisumu   | CAR     |");
+        log.info("| rider_thika_cbd      | Thika    | BIKE    |");
+        log.info("| rider_thika_landless | Thika    | CAR     |");
+        log.info("----------------------------------------------------------------------------");
+        log.info("Map Data Public Endpoint: GET /api/v1/public/map-data");
+        log.info("============================================================================");
     }
 }

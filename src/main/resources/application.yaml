@@ -58,12 +58,19 @@ app:
   verification-token:
     expiration-minutes: 15 # token expires after 15 minutes
     token-length: 32 # length of the random bytes used for token generation
+    # Token expiry by type (minutes)
+    expiry:
+      email-verification: 15 # Short - user must verify quickly
+      account-setup: 1440 # 24 hours - user might take time to fill form
+      password-reset: 30 # Medium
+      account-setup-employee: 1440 # 24 hours
 
   # courier-specific configuration
   courier:
     approval:
       auto-approve: true # set to true for testing without admin approval
       require-vehicle-for-freelancer: true # freelancers must provide vehicles details
+      admin-approval-email-delay-seconds: 30 # Delay before sending admin approval email to stagger emails
     employee-id:
       prefix: "COU" # Employee ID format: COU-YYYY-XXXX
       year-format: "yyyy" # year format in employee ID

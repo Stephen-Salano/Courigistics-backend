@@ -55,6 +55,9 @@ public class CourierAuthServiceImpl implements CourierAuthService {
     @Value("${app.courier.approval.auto-approve}")
     private boolean autoApprove;
 
+    @Value("${app.courier.approval.admin-approval-email-delay-seconds:0}")
+    private int adminApprovalEmailDelaySeconds;
+
     @Override
     public CourierRegistrationResponse registerCourier(CourierRegisterRequest request) {
         log.info("Starting courier registration for email: {}", request.email());
@@ -220,6 +223,16 @@ public class CourierAuthServiceImpl implements CourierAuthService {
         courier.setApprovedAt(LocalDateTime.now());
         courier.setStatus(CourierStatus.ACTIVE);
         courier.setApprovedBy(admin);
+
+        // Stagger email sending to avoid rate limits (Mailtrap/Production)
+        if (adminApprovalEmailDelaySeconds > 0) {
+            try {
+                log.info("Delaying approval email by {} seconds to stagger emails", adminApprovalEmailDelaySeconds);
+                Thread.sleep(adminApprovalEmailDelaySeconds * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
 
         // 5: Generate account setup token
         VerificationToken setUpToken = verificationTokenService.createToken(

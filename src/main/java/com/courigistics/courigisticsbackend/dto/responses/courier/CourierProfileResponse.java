@@ -5,8 +5,11 @@ import com.courigistics.courigisticsbackend.entities.enums.CourierStatus;
 import com.courigistics.courigisticsbackend.entities.enums.EmploymentType;
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record CourierProfileResponse(
+        UUID id,
         String firstName,
         String lastName,
         String email,
@@ -21,6 +24,7 @@ public record CourierProfileResponse(
         Double depotLon,
         Double currentLat,
         Double currentLon,
+        Boolean availableForAssignment,
         VehicleDTO vehicle
 
 ) {

@@ -23,10 +23,22 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     private final VerificationTokenRepository verificationTokenRepository;
 
     @Value("${app.verification-token.expiration-minutes}")
-    private int expirationInMinutes;
+    private int defaultExpirationInMinutes;
 
     @Value("${app.verification-token.token-length}")
     private int tokenLength;
+
+    @Value("${app.verification-token.expiry.email-verification:15}")
+    private int emailVerificationExpiryMinutes;
+
+    @Value("${app.verification-token.expiry.account-setup:1440}")
+    private int accountSetupExpiryMinutes;
+
+    @Value("${app.verification-token.expiry.password-reset:30}")
+    private int passwordResetExpiryMinutes;
+
+    @Value("${app.verification-token.expiry.account-setup-employee:1440}")
+    private int accountSetupEmployeeExpiryMinutes;
 
     // to generate cryptographically strong random numbers
     private final SecureRandom secureRandom = new SecureRandom();
@@ -37,15 +49,25 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         // First we invalidate any existing tokens of the same type for this account
         invalidateTokens(account, tokenType);
 
-        // create a new token with a secure random value and expiration time
+        int expiryMinutes = getExpiryMinutes(tokenType);
+
         VerificationToken verificationToken = VerificationToken.builder()
                 .account(account)
                 .token(generateSecureToken())
                 .tokenType(tokenType)
-                .expiryDate(LocalDateTime.now().plusMinutes(expirationInMinutes))
-                .used(false) // Explicitly set the value
+                .expiryDate(LocalDateTime.now().plusMinutes(expiryMinutes))
+                .used(false)
                 .build();
         return verificationTokenRepository.save(verificationToken);
+    }
+
+    private int getExpiryMinutes(TokenType tokenType) {
+        return switch (tokenType) {
+            case EMAIL_VERIFICATION -> emailVerificationExpiryMinutes;
+            case ACCOUNT_SETUP -> accountSetupExpiryMinutes;
+            case PASSWORD_RESET -> passwordResetExpiryMinutes;
+            default -> defaultExpirationInMinutes;
+        };
     }
 
     @Override

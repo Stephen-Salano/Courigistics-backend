@@ -296,6 +296,12 @@ public class EmailServiceImpl implements EmailService{
      * @throws MessagingException if email sending fails
      */
     private void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

@@ -140,4 +140,6 @@ public interface CourierRepository extends JpaRepository<Courier, UUID> {
     long countByIsOnlineTrue();
 
     long countByPendingApprovalTrue();
+
+    long countByDepot_Id(UUID depotId);
 }

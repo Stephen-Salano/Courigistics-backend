@@ -62,6 +62,9 @@ public class Account implements UserDetails {
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private Courier courier;
 
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    private Admin admin;
+
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY
     )
